@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { GoogleMap, Marker } from "@react-google-maps/api";
-
+import {
+  GoogleMap,
+  Marker,
+  useJsApiLoader,
+  DrawingManager,
+} from '@react-google-maps/api';
 
 import { toast } from 'react-toastify';
 import api from '../../services/api';
@@ -57,8 +61,8 @@ interface Area {
 export const RouteScripting: React.FC = () => {
   const history = useHistory();
 
-  const [map, setMap] = useState<any>();
-  const [maps, setMaps] = useState<any>();
+  const [map, setMap] = useState<any>(null);
+  const [maps, setMaps] = useState<any>(null);
 
   const [mapLoaded, setMapLoaded] = useState<boolean>(false);
 
@@ -74,8 +78,7 @@ export const RouteScripting: React.FC = () => {
 
   const [originRouteId, setOriginRouteId] = useState<string>('');
   const [destinationRouteId, setDestinationRouteId] = useState<string>('');
-  const [triggerRouteChanges, setTriggerRouteChanges] =
-    useState<boolean>(false);
+  const [triggerRouteChanges, setTriggerRouteChanges] = useState<boolean>(false);
 
   const [showInvoiceInfo, setShowInvoiceInfo] = useState<string>('');
   const [hiddenRoutes, setHiddenRoutes] = useState<string[]>([]);
@@ -85,26 +88,37 @@ export const RouteScripting: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [area, setArea] = useState<any[]>();
-  const [draw, setDraw] = useState<any>();
-  const [shape, setShape] = useState<any>();
-  const [drawPolygon, setDrawPolygon] = useState<any>();
+  const [draw, setDraw] = useState<any | null>(null);
+  const [shape, setShape] = useState<any | null>(null);
+  const [drawPolygon, setDrawPolygon] = useState<any | null>(null);
 
   const [currentRouteDrawing, setCurrentRouteDrawing] = useState<string>('');
+
+  // Load the Google Maps JS API using hook. Key must be in .env as REACT_APP_GOOGLE_MAPS_API_KEY
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+    libraries: ['drawing'],
+  });
 
   useEffect(() => {
     fetchAvailableTrucks();
     fetchAvailableUsers();
     mapLoaded && fetchAvailableInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLoaded]);
 
   useEffect(() => {
-    maps && map && currentRouteDrawing.length && createDrawer(maps, map);
+    if (maps && map && currentRouteDrawing.length) {
+      createDrawer(maps, map);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRouteDrawing]);
 
   useEffect(() => {
-    originRouteId &&
-      destinationRouteId &&
+    if (originRouteId && destinationRouteId) {
       routesToChange(originRouteId, destinationRouteId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerRouteChanges]);
 
   const defaultProps = {
@@ -115,20 +129,15 @@ export const RouteScripting: React.FC = () => {
     zoom: 12,
   };
 
-  const googleMapConfigurations = {
-    key: 'AIzaSyDOM3_4X7fai3TdgMZeYmZ3irA5eX9qiXY',
-    libraries: ['drawing'].join(','),
-  };
+  // NOTE: API key must NOT be hardcoded here. Using env via useJsApiLoader above.
 
-  const startGoogleMapRendering = async (map: any, maps: any) => {
+  const startGoogleMapRendering = (mapInstance: any, mapsLib: any) => {
+    // small delay to ensure map is fully ready
     setTimeout(() => {
-      setMaps(maps);
-      setMap(map);
-
+      setMaps(mapsLib);
+      setMap(mapInstance);
       setMapLoaded(true);
-
-      // createDrawer(maps, map);
-    }, 500);
+    }, 250);
   };
 
   const fetchAvailableInvoices = async () => {
@@ -137,8 +146,9 @@ export const RouteScripting: React.FC = () => {
 
       if (response.data) {
         const sortedAvailable = response.data.sort((a, b) => {
-          const dateA = new Date(a.created_at).valueOf;
-          const dateB = new Date(b.created_at).valueOf;
+          // corrected valueOf() usage
+          const dateA = new Date(a.created_at).valueOf();
+          const dateB = new Date(b.created_at).valueOf();
 
           if (dateA > dateB) return 1;
           if (dateA < dateB) return -1;
@@ -219,9 +229,7 @@ export const RouteScripting: React.FC = () => {
   };
 
   const addNewRoute = async (route: Route) => {
-    route.directionsInstance = await createDirectionsConfig(
-      route.color_indicator as string,
-    );
+    route.directionsInstance = await createDirectionsConfig(route.color_indicator as string);
 
     setSavedRoutes([...(savedRoutes || []), route]);
   };
@@ -282,7 +290,7 @@ export const RouteScripting: React.FC = () => {
 
   const renderAvailableInvoicesPins = () => {
     if (!availableInvoices) {
-      return;
+      return null;
     }
     return availableInvoices.map((invoice, index) => {
       return (
@@ -303,28 +311,25 @@ export const RouteScripting: React.FC = () => {
 
   const renderSavedRoutesIPins = () => {
     if (!savedRoutes) {
-      return;
+      return null;
     }
 
     return savedRoutes.map((item, index) => {
       if (hideRoute(item.id)) {
-        return;
+        return null;
       }
 
       return renderInvoicesPinsToLoadOrDeliver(item.route_items, color(index));
     });
   };
 
-  const renderInvoicesPinsToLoadOrDeliver = (
-    routeItem: RouteItem[],
-    color: string,
-  ) => {
+  const renderInvoicesPinsToLoadOrDeliver = (routeItem: RouteItem[], colorStr: string) => {
     return routeItem.map(({ invoice, identifier }, index) => {
       const isNewRouteSeladPoint = invoice?.id === seladData.invoice.id;
       const isSeladPoint = !invoice?.id || isNewRouteSeladPoint;
 
       if (isSeladPoint) {
-        return;
+        return null;
       }
 
       return (
@@ -334,7 +339,7 @@ export const RouteScripting: React.FC = () => {
           lng={invoice.longitude}
           invoiceInfo={invoice}
           order={identifier}
-          color={color}
+          color={colorStr}
           seladBase={false}
           showInvoiceInfo={showInvoiceInfo}
           fetchAvailableInvoices={fetchAvailableInvoices}
@@ -343,8 +348,8 @@ export const RouteScripting: React.FC = () => {
     });
   };
 
-  const addInformationsToSavedRoutes = async (savedRoutes: Route[]) => {
-    let routesToHandle = savedRoutes;
+  const addInformationsToSavedRoutes = async (savedRoutesParam: Route[]) => {
+    let routesToHandle = savedRoutesParam;
 
     routesToHandle = await addIdentifierToInvoices(routesToHandle);
 
@@ -363,8 +368,10 @@ export const RouteScripting: React.FC = () => {
             distance: routeInformation?.distance,
             time: routeInformation?.duration,
             directionsInstance: routeInformation?.directionsInstance,
-          };
+          } as Route;
         }
+
+        return item;
       }),
     );
 
@@ -373,13 +380,13 @@ export const RouteScripting: React.FC = () => {
 
   const setupRoutes = async (
     routeItem: RouteItem[],
-    color: string,
+    colorStr: string,
     directionsInstance: any = null,
   ): Promise<RouteInfo | undefined> => {
     const directions = await formatedDirections(routeItem);
 
-    let amounts!: RouteInfo;
-    let directionsConfig!: Directions;
+    let amounts: RouteInfo | undefined;
+    let directionsConfig: Directions | undefined;
 
     const directionsInfo: RouteInfo = {
       distance: 0,
@@ -388,7 +395,7 @@ export const RouteScripting: React.FC = () => {
     };
 
     if (!directionsInstance) {
-      directionsConfig = await createDirectionsConfig(color);
+      directionsConfig = await createDirectionsConfig(colorStr);
     }
 
     if (directionsInstance) {
@@ -400,27 +407,31 @@ export const RouteScripting: React.FC = () => {
       directionsInfo.duration = 0;
       directionsInfo.directionsInstance = directionsConfig;
 
-      directionsConfig.direction_renderer.setMap(null);
+      try {
+        directionsConfig?.direction_renderer?.setMap(null);
+      } catch (e) {
+        // ignore
+      }
 
       return directionsInfo;
     }
 
-    if (directions) {
-      directionsConfig.direction_renderer.setMap(map);
+    if (directions && directionsConfig) {
+      try {
+        directionsConfig.direction_renderer.setMap(map);
 
-      directionsConfig.direction_service.route(directions);
-      await directionsConfig.direction_service.route(
-        directions,
-        async (result: any, status: any) => {
+        await directionsConfig.direction_service.route(directions, async (result: any, status: any) => {
           if (status === 'OK') {
             amounts = await getDistanceAndTime(result.routes[0].legs);
 
-            directionsConfig.direction_renderer.setMap(map);
+            directionsConfig!.direction_renderer.setMap(map);
 
-            directionsConfig.direction_renderer.setDirections(result);
+            directionsConfig!.direction_renderer.setDirections(result);
           }
-        },
-      );
+        });
+      } catch (error) {
+        console.error('Error routing directions', error);
+      }
     }
 
     if (amounts) {
@@ -432,25 +443,37 @@ export const RouteScripting: React.FC = () => {
     return directionsInfo;
   };
 
-  const createDirectionsConfig = async (color: string) => {
+  const createDirectionsConfig = async (colorStr: string) => {
+    if (!maps) {
+      // maps (google.maps namespace) not ready
+      return {
+        direction_service: null,
+        direction_renderer: null,
+      } as Directions;
+    }
+
     const polyline = {
-      strokeColor: `${color}`,
+      strokeColor: `${colorStr}`,
       strokeWeight: 5,
       strokeOpacity: 0.5,
     };
 
-    let directionsService = await new maps.DirectionsService();
-
-    let directionsRenderer = await new maps.DirectionsRenderer();
+    const directionsService = new maps.DirectionsService();
+    const directionsRenderer = new maps.DirectionsRenderer();
 
     directionsRenderer.setOptions({
       polylineOptions: polyline,
       suppressMarkers: true,
       suppressPolylines: false,
     });
-    directionsRenderer.setMap(map);
 
-    const directions = {
+    try {
+      directionsRenderer.setMap(map);
+    } catch (e) {
+      // ignore if map not ready yet
+    }
+
+    const directions: Directions = {
       direction_service: directionsService,
       direction_renderer: directionsRenderer,
     };
@@ -459,22 +482,23 @@ export const RouteScripting: React.FC = () => {
   };
 
   const formatedDirections = (itemToLoad: RouteItem[]) => {
+    if (!itemToLoad || itemToLoad.length === 0) return null;
+
     const formatedLocations = itemToLoad.map(({ latitude, longitude }) => {
       return {
-        location: `${latitude + ',' + longitude}`,
+        location: `${latitude},${longitude}`,
       };
     });
 
     const startingPoint = formatedLocations[0].location;
-    const endingPoint =
-      formatedLocations[formatedLocations.length - 1].location;
+    const endingPoint = formatedLocations[formatedLocations.length - 1].location;
 
-    const waypoints = formatedLocations.filter(
-      (item, index) => index !== 0 && index !== formatedLocations.length - 1,
-    );
+    const waypoints = formatedLocations
+      .slice(1, formatedLocations.length - 1)
+      .map((w) => ({ location: w.location, stopover: true }));
 
     if (formatedLocations.length === 1) {
-      return;
+      return null;
     }
 
     const direction = {
@@ -498,9 +522,6 @@ export const RouteScripting: React.FC = () => {
     });
 
     const directionsInfo = {
-      // distance: String(distance / 1000),
-      // duration: String(minutesToHours(duration)),
-
       distance: distance,
       duration: duration,
     };
@@ -511,23 +532,13 @@ export const RouteScripting: React.FC = () => {
   const routesToChange = async (originId: string, destinationId: string) => {
     if (savedRoutes) {
       const originRouteToChange = savedRoutes.find(({ id }) => id === originId);
-      const destinationRouteToChange = savedRoutes.find(
-        ({ id }) => id === destinationId,
-      );
+      const destinationRouteToChange = savedRoutes.find(({ id }) => id === destinationId);
 
       const updatedOriginData =
-        originRouteToChange &&
-        (await updateRoutesAndInfo(
-          originRouteToChange.route_items,
-          originRouteToChange.directionsInstance,
-        ));
+        originRouteToChange && (await updateRoutesAndInfo(originRouteToChange.route_items, originRouteToChange.directionsInstance));
 
       const updatedDestinationData =
-        destinationRouteToChange &&
-        (await updateRoutesAndInfo(
-          destinationRouteToChange.route_items,
-          destinationRouteToChange?.directionsInstance,
-        ));
+        destinationRouteToChange && (await updateRoutesAndInfo(destinationRouteToChange.route_items, destinationRouteToChange?.directionsInstance));
 
       setSavedRoutes(
         savedRoutes.map((item) => {
@@ -537,7 +548,7 @@ export const RouteScripting: React.FC = () => {
               distance: Number(updatedOriginData.distance),
               time: Number(updatedOriginData.duration),
               directionsInstance: updatedOriginData.directionsInstance,
-            };
+            } as Route;
           }
 
           if (updatedDestinationData && item.id === destinationId) {
@@ -546,7 +557,7 @@ export const RouteScripting: React.FC = () => {
               distance: updatedDestinationData.distance,
               time: updatedDestinationData.duration,
               directionsInstance: updatedDestinationData.directionsInstance,
-            };
+            } as Route;
           }
 
           return item;
@@ -555,13 +566,10 @@ export const RouteScripting: React.FC = () => {
     }
   };
 
-  const updateRoutesAndInfo = async (
-    routeItem: RouteItem[],
-    directionsInstance: any = undefined,
-  ): Promise<RouteInfo | undefined> => {
+  const updateRoutesAndInfo = async (routeItem: RouteItem[], directionsInstance: any = undefined): Promise<RouteInfo | undefined> => {
     const directions = await formatedDirections(routeItem);
 
-    let amounts!: RouteInfo;
+    let amounts: RouteInfo | undefined;
 
     const directionsConfig = directionsInstance;
 
@@ -576,23 +584,28 @@ export const RouteScripting: React.FC = () => {
       directionsInfo.duration = 0;
       directionsInfo.directionsInstance = directionsConfig;
 
-      directionsConfig.direction_renderer.setMap(null);
+      try {
+        directionsConfig?.direction_renderer?.setMap(null);
+      } catch (e) {
+        // ignore
+      }
 
       return directionsInfo;
     }
 
     if (directions) {
-      directionsConfig.direction_renderer.setMap(map);
-      await directionsConfig.direction_service.route(
-        directions,
-        async (result: any, status: any) => {
+      try {
+        directionsConfig.direction_renderer.setMap(map);
+        await directionsConfig.direction_service.route(directions, async (result: any, status: any) => {
           if (status === 'OK') {
             amounts = await getDistanceAndTime(result.routes[0].legs);
 
             directionsConfig.direction_renderer.setDirections(result);
           }
-        },
-      );
+        });
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     if (amounts) {
@@ -620,16 +633,14 @@ export const RouteScripting: React.FC = () => {
     let size;
 
     if (resizable) {
-      size = `${Number(initialSize) + Number(e.clientY - initialPos)}px
-      `;
+      size = `${Number(initialSize) + Number(e.clientY - initialPos)}px`;
 
       resizable.style.height = size;
     }
 
     if (resizeTable) {
       if (e.pageY !== 0) {
-        console.log(e.pageY);
-
+        // console.log(e.pageY);
         resizeTable.style.height = `calc(99vh - ${size})`;
       }
     }
@@ -643,13 +654,21 @@ export const RouteScripting: React.FC = () => {
     const route = savedRoutes.find(({ id }) => id === routeId);
 
     if (!showRoute) {
-      route && route.directionsInstance.direction_renderer.setMap(null);
+      try {
+        route && route.directionsInstance?.direction_renderer?.setMap(null);
+      } catch (e) {
+        // ignore
+      }
 
       return setHiddenRoutes([...hiddenRoutes, routeId]);
     }
 
     if (showRoute) {
-      route && route.directionsInstance.direction_renderer.setMap(map);
+      try {
+        route && route.directionsInstance?.direction_renderer?.setMap(map);
+      } catch (e) {
+        // ignore
+      }
 
       const cleanCollection = hiddenRoutes.filter((item) => item !== routeId);
 
@@ -674,32 +693,24 @@ export const RouteScripting: React.FC = () => {
       savedRoutes.forEach((item, index) => {
         const cleanInvoices = item.route_items.map((item) => {
           let { identifier, invoice_route_id, ...rest } = item;
-          const cleanInvoice = rest;
+          const cleanInvoice = rest as any;
 
-          delete cleanInvoice.invoice.identifier;
+          if (cleanInvoice.invoice) delete (cleanInvoice.invoice as any).identifier;
 
           return cleanInvoice;
         });
 
-        let originalInvoices;
+        let originalInvoices: string | undefined;
 
         if (originalSavedRoutes && originalSavedRoutes[index]) {
           const originalRouteItems = originalSavedRoutes[index].route_items;
-          const originalRouteItemsWithoutStartingPoint =
-            originalRouteItems.slice(1, originalRouteItems.length);
+          const originalRouteItemsWithoutStartingPoint = originalRouteItems.slice(1, originalRouteItems.length);
 
-          originalInvoices = JSON.stringify(
-            originalRouteItemsWithoutStartingPoint,
-          );
+          originalInvoices = JSON.stringify(originalRouteItemsWithoutStartingPoint);
         }
 
-        const savedRouteItemsWithoutStartingPoint = cleanInvoices.slice(
-          1,
-          cleanInvoices.length,
-        );
-        const savedInvoicesJSON = JSON.stringify(
-          savedRouteItemsWithoutStartingPoint,
-        );
+        const savedRouteItemsWithoutStartingPoint = cleanInvoices.slice(1, cleanInvoices.length);
+        const savedInvoicesJSON = JSON.stringify(savedRouteItemsWithoutStartingPoint);
 
         if (savedInvoicesJSON === originalInvoices) {
           return;
@@ -712,21 +723,13 @@ export const RouteScripting: React.FC = () => {
           return;
         }
 
-        if (
-          (originalSavedRoutes && !originalSavedRoutes[index]) ||
-          !originalSavedRoutes
-        ) {
-          if (item.route_items.length > 1)
-            routesToHandle.routesToSave.push(item);
+        if ((originalSavedRoutes && !originalSavedRoutes[index]) || !originalSavedRoutes) {
+          if (item.route_items.length > 1) routesToHandle.routesToSave.push(item);
 
           return;
         }
 
-        if (
-          originalInvoices &&
-          savedInvoicesJSON &&
-          savedInvoicesJSON !== originalInvoices
-        ) {
+        if (originalInvoices && savedInvoicesJSON && savedInvoicesJSON !== originalInvoices) {
           routesToHandle.routesToDelete.push(item);
           routesToHandle.routesToSave.push(item);
 
@@ -753,21 +756,15 @@ export const RouteScripting: React.FC = () => {
 
   const deleteRoute = async (routesToHandle: RoutesToHandle) => {
     setLoading(true);
-    const oldRoutesToDelete = routesToHandle.routesToDelete.filter(
-      (route) => !route.id.includes('new-route'),
-    );
+    const oldRoutesToDelete = routesToHandle.routesToDelete.filter((route) => !route.id.includes('new-route'));
 
     if (oldRoutesToDelete.length) {
       try {
-        const promises = await Promise.all(
-          oldRoutesToDelete.map((item, index) => {
-            return api.delete(`truck-routes/${item.id}`);
-          }),
-        );
+        const promises = await Promise.all(oldRoutesToDelete.map((item) => api.delete(`truck-routes/${item.id}`)));
 
         if (promises) {
           if (routesToHandle.routesToSave.length) {
-            saveNewRoute(routesToHandle);
+            await saveNewRoute(routesToHandle);
           } else {
             reloadInfo();
           }
@@ -778,31 +775,26 @@ export const RouteScripting: React.FC = () => {
         setLoading(false);
       }
     } else {
-      saveNewRoute(routesToHandle);
+      await saveNewRoute(routesToHandle);
     }
   };
 
   const saveNewRoute = async (routesToHandle: RoutesToHandle) => {
     setLoading(true);
 
-    const formated = formatToSaveOrUpdate(routesToHandle.routesToSave).filter(
-      Boolean,
-    );
+    const formated = formatToSaveOrUpdate(routesToHandle.routesToSave).filter(Boolean) as any[];
 
     try {
-      const promises = await formated.reduce(async (acc: any, item) => {
-        if (!item) {
-          return await acc;
-        }
+      const results = await Promise.all(
+        formated.map(async (item) => {
+          if (!item) return null;
+          const { id, ...rest } = item;
+          const apiResponse = await api.post('truck-routes', rest);
+          return apiResponse;
+        }),
+      );
 
-        const resolvedAcc = await acc;
-
-        const { id, ...rest } = item;
-        const apiResponse = await api.post('truck-routes', rest);
-
-        return [...resolvedAcc, apiResponse];
-      }, []);
-      if (promises) {
+      if (results) {
         reloadInfo();
       }
     } catch (error: any) {
@@ -819,28 +811,18 @@ export const RouteScripting: React.FC = () => {
       let routeCubage = 0;
       let routeWeight = 0;
 
-      const formatedInvoices = route.route_items.map((item, index) => {
-        routeCubage = item.invoice.cubage
-          ? routeCubage + Number(item.invoice.cubage)
-          : 0;
-        routeWeight = item.invoice.weight
-          ? routeWeight + item.invoice.weight
-          : 0;
+      const formatedInvoices = route.route_items.map((item) => {
+        routeCubage = item.invoice.cubage ? routeCubage + Number(item.invoice.cubage) : routeCubage;
+        routeWeight = item.invoice.weight ? routeWeight + item.invoice.weight : routeWeight;
 
         const invoice = {
           invoice_id: item.invoice.id,
-          order: index,
-          // delivery_time: new Date().toISOString(),
+          order: item.delivery_order || 0,
         };
         return invoice;
       });
 
-      // Pontos selad (inicio e fim) já salvos no banco tem um invoice_id = null
-      // quando a rota está sendo criada é atribuída um invoice_id=seladData.invoice.id aos pontos inicial e final
-      const invoicesWithoutSeladPoints = formatedInvoices.filter(
-        (value) =>
-          !!value.invoice_id && value.invoice_id !== seladData.invoice.id,
-      );
+      const invoicesWithoutSeladPoints = formatedInvoices.filter((value) => !!value.invoice_id && value.invoice_id !== seladData.invoice.id);
 
       if (!invoicesWithoutSeladPoints.length) {
         return undefined;
@@ -872,13 +854,15 @@ export const RouteScripting: React.FC = () => {
     }, 3000);
   };
 
-  const createDrawer = async (maps: any, map: any) => {
+  const createDrawer = async (mapsLib: any, mapInstance: any) => {
+    if (!mapsLib || !mapInstance) return;
+
     let drawingPolygon =
       drawPolygon ||
-      (await new maps.drawing.DrawingManager({
+      new mapsLib.drawing.DrawingManager({
         drawingControlOptions: {
-          position: maps.ControlPosition.TOP_CENTER,
-          drawingModes: [maps.drawing.OverlayType.POLYGON],
+          position: mapsLib.ControlPosition.TOP_CENTER,
+          drawingModes: [mapsLib.drawing.OverlayType.POLYGON],
         },
         polygonOptions: {
           strokeColor: '#002e75',
@@ -887,22 +871,22 @@ export const RouteScripting: React.FC = () => {
           fillColor: '#ff9700',
           fillOpacity: 0.25,
         },
-      }));
+      });
 
     if (drawingPolygon) {
-      drawingPolygon.setMap(map);
+      drawingPolygon.setMap(mapInstance);
 
       drawingPolygon.setOptions({
         drawingControl: true,
       });
 
       drawingPolygon.addListener('polygoncomplete', (polygon: any) => {
-        let polygonBounds = polygon.getPath();
+        const polygonBounds = polygon.getPath();
 
-        let coordinates = [];
+        const coordinates: Area[] = [];
 
         for (let i = 0; i < polygonBounds.length; i++) {
-          let point = {
+          const point = {
             lat: polygonBounds.getAt(i).lat(),
             lng: polygonBounds.getAt(i).lng(),
           };
@@ -917,23 +901,27 @@ export const RouteScripting: React.FC = () => {
 
         drawingPolygon.setMap(null);
         setDrawPolygon(drawingPolygon);
-        setMap(map);
+        setMap(mapInstance);
       });
     }
   };
 
   const resetPolygon = () => {
-    draw.setDrawingMode(null);
-    shape.setMap(null);
+    try {
+      draw && draw.setDrawingMode && draw.setDrawingMode(null);
+      shape && shape.setMap && shape.setMap(null);
 
-    drawPolygon.setMap(map);
-    setArea(undefined);
+      drawPolygon && drawPolygon.setMap && drawPolygon.setMap(map);
+      setArea(undefined);
+    } catch (e) {
+      // ignore
+    }
   };
 
-  const handleCoordinates = (area: Area[]) => {
+  const handleCoordinates = (areaParam: Area[]) => {
     const refactoredArray: any[] = [];
 
-    area.map(({ lat, lng }) => {
+    areaParam.map(({ lat, lng }) => {
       refactoredArray.push([lat, lng]);
     });
 
@@ -945,32 +933,23 @@ export const RouteScripting: React.FC = () => {
 
     const invoicesInArea = handlePolygon(area as number[][]);
 
-    invoicesInArea.length &&
-      removeRouteItemsFromAvailableItems(getInvoicesInAreaId(invoicesInArea));
+    invoicesInArea.length && removeRouteItemsFromAvailableItems(getInvoicesInAreaId(invoicesInArea));
+
+    setLoading(false);
   };
 
   const getInvoicesInAreaId = (invoices: Invoice[]) => {
-    const invoicesIds = invoices.map((invoice) => {
-      return invoice.id;
-    });
+    const invoicesIds = invoices.map((invoice) => invoice.id);
 
     return invoicesIds;
   };
 
   const removeRouteItemsFromAvailableItems = (invoiceIds: string[]) => {
-    const availableInvoicesWithRemovedItems = availableInvoices.filter(
-      (invoice) => {
-        return !invoiceIds.includes(invoice.id);
-      },
-    );
+    const availableInvoicesWithRemovedItems = availableInvoices.filter((invoice) => !invoiceIds.includes(invoice.id));
 
-    const pointsToAddOnNewRoute = availableInvoices.filter((invoice) => {
-      return invoiceIds.includes(invoice.id);
-    });
+    const pointsToAddOnNewRoute = availableInvoices.filter((invoice) => invoiceIds.includes(invoice.id));
 
-    const routeToHandle = savedRoutes.find(
-      (item) => item.id === currentRouteDrawing,
-    );
+    const routeToHandle = savedRoutes.find((item) => item.id === currentRouteDrawing);
 
     if (!routeToHandle || !pointsToAddOnNewRoute.length) return;
 
@@ -978,23 +957,14 @@ export const RouteScripting: React.FC = () => {
     addItemRoutesToDestinationRoute(pointsToAddOnNewRoute, routeToHandle);
   };
 
-  const addItemRoutesToDestinationRoute = (
-    pointsToAddOnNewRoute: Invoice[],
-    routeToHandle: Route,
-  ) => {
+  const addItemRoutesToDestinationRoute = (pointsToAddOnNewRoute: Invoice[], routeToHandle: Route) => {
     const routeItems = createRouteItems(pointsToAddOnNewRoute);
 
     const routeItemsCollection = routeToHandle?.route_items || [];
 
     const newRouteItems = [...routeItemsCollection, ...routeItems];
 
-    setSavedRoutes(
-      savedRoutes.map((item) =>
-        item.id === currentRouteDrawing
-          ? { ...item, route_items: newRouteItems }
-          : item,
-      ),
-    );
+    setSavedRoutes(savedRoutes.map((item) => (item.id === currentRouteDrawing ? { ...item, route_items: newRouteItems } : item)));
 
     setOriginRouteId('available-points');
     setDestinationRouteId(currentRouteDrawing);
@@ -1009,7 +979,7 @@ export const RouteScripting: React.FC = () => {
     const routeItems = invoices.map((invoice) => {
       const { id, identifier, latitude, longitude } = invoice;
 
-      const routeItem = {
+      const routeItem: any = {
         id,
         identifier,
         latitude,
@@ -1038,10 +1008,7 @@ export const RouteScripting: React.FC = () => {
     availableInvoices.forEach((item) => {
       const { latitude, longitude } = item;
 
-      const invoiceIsInTheArea = polygonContainsPoint(polygon, [
-        latitude,
-        longitude,
-      ]);
+      const invoiceIsInTheArea = polygonContainsPoint(polygon, [latitude, longitude]);
 
       invoiceIsInTheArea && invoicesInArea.push(item);
     });
@@ -1060,13 +1027,28 @@ export const RouteScripting: React.FC = () => {
       const xj = polygon[j][0];
       const yj = polygon[j][1];
 
-      const intersect =
-        yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+      const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
       if (intersect) inside = !inside;
     }
 
     return inside;
   };
+
+  // map load handler
+  const onMapLoad = useCallback((mapInstance: any) => {
+    // mapInstance is the google.maps.Map instance
+    const mapsLib = (window as any).google?.maps || null;
+
+    if (mapsLib) {
+      startGoogleMapRendering(mapInstance, mapsLib);
+    } else {
+      // fallback
+      setMap(mapInstance);
+      setMaps(null);
+      setMapLoaded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -1081,11 +1063,8 @@ export const RouteScripting: React.FC = () => {
 
             setShowInvoiceInfo(invoice.id);
 
-            if (invoice.latitude && invoice.longitude) {
-              map.setCenter({
-                lat: invoice.latitude,
-                lng: invoice.longitude,
-              });
+            if (invoice.latitude && invoice.longitude && map && map.setCenter) {
+              map.setCenter({ lat: invoice.latitude, lng: invoice.longitude });
             }
           }}
         />
@@ -1093,41 +1072,50 @@ export const RouteScripting: React.FC = () => {
         {area && (
           <ActionButtonsWrapper>
             <>
-              <ResetButton onClick={() => resetPolygon()}>
-                Apagar área
-              </ResetButton>
+              <ResetButton onClick={() => resetPolygon()}>Apagar área</ResetButton>
 
-              <ResetButton onClick={() => fetchInvoicesInArea()}>
-                Adicionar à rota
-              </ResetButton>
+              <ResetButton onClick={() => fetchInvoicesInArea()}>Adicionar à rota</ResetButton>
             </>
           </ActionButtonsWrapper>
         )}
 
-        {/* <Sidebar contract={true} className="sidebar" /> */}
-        <GoogleMapReact
-          bootstrapURLKeys={googleMapConfigurations}
-          defaultCenter={defaultProps.center}
-          defaultZoom={defaultProps.zoom}
-          yesIWantToUseGoogleMapApiInternals
-          onGoogleApiLoaded={({ map, maps }) =>
-            startGoogleMapRendering(map, maps)
-          }
-        >
-          {renderSeladPin()}
-          {!hideAvailableInvoices && renderAvailableInvoicesPins()}
-          {savedRoutes && renderSavedRoutesIPins()}
-        </GoogleMapReact>
+        {loadError && <div>Erro ao carregar o Google Maps API</div>}
+
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={{ width: '100%', height: '600px' }}
+            center={defaultProps.center}
+            zoom={defaultProps.zoom}
+            onLoad={onMapLoad}
+            options={{ disableDefaultUI: false }}
+          >
+            {/* Render pins - LocationMarker uses its own Marker internally */}
+            {renderSeladPin()}
+            {!hideAvailableInvoices && renderAvailableInvoicesPins()}
+            {savedRoutes && renderSavedRoutesIPins()}
+
+            {/* You can render extra children like a DrawingManager if needed */}
+            {/* Example of DrawingManager usage (uncontrolled): */}
+            {maps && (
+              // @ts-ignore - DrawingManager typing can be tricky depending on package version
+              <DrawingManager
+                onLoad={(dm: any) => {
+                  // keep reference if needed
+                }}
+                options={{
+                  drawingControl: false,
+                }}
+              />
+            )}
+          </GoogleMap>
+        ) : (
+          <div>Carregando mapa...</div>
+        )}
 
         <RoutesInfoWrapper>
           <div id="dinamic-spacer-element" />
 
-          <div
-            className="routes-info__top-border"
-            draggable="true"
-            onDragStart={initial}
-            onDrag={resize}
-          />
+          <div className="routes-info__top-border" draggable="true" onDragStart={initial} onDrag={resize} />
 
           <div className="routes-info__info-wrapper">
             <RouteringTable
@@ -1139,9 +1127,7 @@ export const RouteScripting: React.FC = () => {
               hideOrShowRoute={hideOrShowRoute}
               hideRoute={hideRoute}
               hideAvailableInvoices={hideAvailableInvoices}
-              toggleHideAvailableInvoices={() =>
-                setHideAvailableInvoices((prev) => !prev)
-              }
+              toggleHideAvailableInvoices={() => setHideAvailableInvoices((prev) => !prev)}
             />
 
             {availableInvoices && (
@@ -1169,3 +1155,5 @@ export const RouteScripting: React.FC = () => {
     </>
   );
 };
+
+export default RouteScripting;
