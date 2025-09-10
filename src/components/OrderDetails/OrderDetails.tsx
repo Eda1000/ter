@@ -39,7 +39,6 @@ import { BoxesList } from '../BoxesList/BoxesList';
 import { InvoiceDetail } from '../../Interfaces/Invoice';
 
 interface Props {
-  // invoice: Invoice | undefined;
   truckId: string;
   invoiceId: string;
   setShowOrderDetails: Function;
@@ -67,7 +66,6 @@ interface IOperator {
 }
 
 export const OrderDetails: React.FC<Props> = ({
-  // invoice,
   truckId,
   invoiceId,
   onDeleteInvoice,
@@ -78,17 +76,22 @@ export const OrderDetails: React.FC<Props> = ({
   const [infoSelected, setInfoSelected] = useState<string>('order-info');
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [operators, setOperators] = useState([] as IOperator[]);
+  const [operators, setOperators] = useState<IOperator[]>([]);
 
   const [occurrences, setOccurrences] = useState<Occurrence[]>();
-  const [occurrenceData, setOccurrenceData] = useState({
+  const [occurrenceData, setOccurrenceData] = useState<{
+    type: string;
+    description: string;
+    image?: File;
+    invoice_id: string;
+  }>({
     type: '',
     description: '',
-    image: undefined as File | undefined,
+    image: undefined,
     invoice_id: invoiceId,
   });
 
-  const [invoice, setInvoice] = useState<InvoiceDetail>();
+  const [invoice, setInvoice] = useState<InvoiceDetail | undefined>(undefined);
 
   const [freezeInvoice, setFreezeInvoice] = useState({
     delivery_type: 'no-action',
@@ -96,8 +99,6 @@ export const OrderDetails: React.FC<Props> = ({
     note: '',
     reason: '',
   });
-
-  console.log(invoice);
 
   // constants that display modals
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -119,6 +120,7 @@ export const OrderDetails: React.FC<Props> = ({
     if (invoiceId) {
       fetchInvoiceDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invoiceId]);
 
   const fetchInvoiceDetails = async () => {
@@ -170,7 +172,7 @@ export const OrderDetails: React.FC<Props> = ({
   };
 
   const onReceiptChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { files } = event.target;
+    const files = event.target.files;
 
     if (files && files?.length > 0) {
       setReceipt(files[0]);
@@ -182,8 +184,7 @@ export const OrderDetails: React.FC<Props> = ({
   };
 
   const handleReceipt = async () => {
-    // setLoading(true);
-
+    // implementation placeholder - uncomment and implement when backend ready
     if (receipt && invoice && invoice.id) {
       // const formData = new FormData();
       // formData.append('image', receipt);
@@ -195,17 +196,15 @@ export const OrderDetails: React.FC<Props> = ({
       //   toast.error(error?.response?.data?.message || 'Opps ocorreu um erro, tente novamente mais tarde!')
       // }
     }
-
-    // setLoading(false);
   };
 
   const getOperators = async () => {
     try {
       const response = await api.get(`/invoices/${invoiceId}/operators`);
 
-      const operators = response.data || [];
+      const operatorsResp = response.data || [];
 
-      setOperators(operators);
+      setOperators(operatorsResp);
     } catch (error: any) {
       handleError(error.response?.data?.message || error.toString());
     } finally {
@@ -215,11 +214,13 @@ export const OrderDetails: React.FC<Props> = ({
 
   useEffect(() => {
     getOccurrences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [infoSelected]);
 
   useEffect(() => {
     getOperators();
     setOccurrences(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getOccurrences = async () => {
@@ -229,11 +230,14 @@ export const OrderDetails: React.FC<Props> = ({
         params: { invoice_id: invoiceId },
       });
 
-      if (response.data.length) {
+      if (response.data && response.data.length) {
         setOccurrences(response.data);
+      } else {
+        setOccurrences([]);
       }
     } catch (error: any) {
       handleError(error.response?.data?.message || error.toString());
+      setOccurrences([]);
     } finally {
       setLoading(false);
     }
@@ -289,10 +293,7 @@ export const OrderDetails: React.FC<Props> = ({
   const saveFreezeInvoice = async () => {
     setLoading(true);
     try {
-      const response = await api.patch(
-        `invoices/${invoice?.id}/delivery-type`,
-        freezeInvoice,
-      );
+      const response = await api.patch(`invoices/${invoice?.id}/delivery-type`, freezeInvoice);
 
       if (response) {
         toast.success('Nota congelada com sucesso!');
@@ -308,12 +309,9 @@ export const OrderDetails: React.FC<Props> = ({
     setLoading(true);
 
     try {
-      const response = await api.patch(
-        `invoices/${invoice?.id}/delivery-type`,
-        {
-          delivery_type: 'normal',
-        },
-      );
+      const response = await api.patch(`invoices/${invoice?.id}/delivery-type`, {
+        delivery_type: 'normal',
+      });
 
       if (response) {
         toast.success('Nota liberada com sucesso!');
@@ -381,10 +379,7 @@ export const OrderDetails: React.FC<Props> = ({
     setLoading(true);
 
     try {
-      const response = await api.patch(
-        `invoices/${invoice?.id}/delivery-type`,
-        { delivery_type: 'local' },
-      );
+      const response = await api.patch(`invoices/${invoice?.id}/delivery-type`, { delivery_type: 'local' });
 
       if (response) {
         toast.success('Alteração salva com sucesso!');
@@ -463,11 +458,8 @@ export const OrderDetails: React.FC<Props> = ({
 
                 <td data-label="Nome do operador">
                   <span className="table__information-span">
-                    {invoice?.invoice_operators &&
-                      invoice?.invoice_operators?.length > 0 &&
-                      invoice?.invoice_operators[
-                        invoice.invoice_operators.length - 1
-                      ].user?.individual_person?.name}
+                    {invoice?.invoice_operators && invoice?.invoice_operators.length > 0 &&
+                      invoice.invoice_operators[invoice.invoice_operators.length - 1].user?.individual_person?.name}
                   </span>
                 </td>
               </tr>
@@ -493,11 +485,7 @@ export const OrderDetails: React.FC<Props> = ({
                 <tr>
                   <th>Inconsistência</th>
 
-                  {/* <th>Tipo de caixa</th> */}
-
                   <th>Quantidade de etiquetas lidas</th>
-
-                  {/* <th>Quantidade liberada</th> */}
 
                   <th>Operações</th>
                 </tr>
@@ -506,70 +494,37 @@ export const OrderDetails: React.FC<Props> = ({
                 <tr>
                   <td data-label="Inconsistência">
                     {invoice?.amount_boxes !== invoice?.amount_read_labels ? (
-                      <img
-                        className="table__status-icon"
-                        src={caution_icon}
-                        alt="inconsitência"
-                      />
+                      <img className="table__status-icon" src={caution_icon} alt="inconsitência" />
                     ) : (
-                      <img
-                        className="table__status-icon"
-                        src={success_icon}
-                        alt="sucesso"
-                      />
+                      <img className="table__status-icon" src={success_icon} alt="sucesso" />
                     )}
                   </td>
 
-                  {/* <td data-label="Tipo de caixa">XXXXXX</td> */}
-
                   <td data-label="Qtde de etiquedas lidas">
-                    {invoice?.amount_read_labels || '00'}/
-                    {invoice?.amount_boxes}
+                    {invoice?.amount_read_labels || '00'}/{invoice?.amount_boxes}
                   </td>
-
-                  {/* <td data-label="Qtde liberada">02</td> */}
 
                   <td data-label="Operações">
                     <span className="table__actions-wrapper">
-                      <span
-                        className="table__actions-wrapper__action free-item"
-                        onClick={() => handleSketch(invoice && invoice.id)}
-                      >
+                      <span className="table__actions-wrapper__action free-item" onClick={() => handleSketch(invoice && invoice.id)}>
                         Pular coleta
                       </span>
 
-                      <span
-                        className="table__actions-wrapper__action free-item"
-                        onClick={() => handleFreeStorage()}
-                      >
+                      <span className="table__actions-wrapper__action free-item" onClick={() => handleFreeStorage()}>
                         Pular armazém
                       </span>
 
-                      <span
-                        className="table__actions-wrapper__action free-item"
-                        onClick={() => handleFreeLoading()}
-                      >
+                      <span className="table__actions-wrapper__action free-item" onClick={() => handleFreeLoading()}>
                         Pular carregamento
                       </span>
 
-                      <span
-                        className="table__actions-wrapper__action free-item"
-                        onClick={() => handleFinish()}
-                      >
+                      <span className="table__actions-wrapper__action free-item" onClick={() => handleFinish()}>
                         Finalizar entrega
                       </span>
 
-                      <span
-                        className="table__actions-wrapper__action free-item"
-                        onClick={() => handleFreeLocal()}
-                      >
+                      <span className="table__actions-wrapper__action free-item" onClick={() => handleFreeLocal()}>
                         Liberar entrega local
                       </span>
-
-                      {/* <span className="table__actions-wrapper__action delete">
-                        <img src={fail_icon} alt="deletar" />
-                        Excluir
-                      </span> */}
                     </span>
                   </td>
                 </tr>
@@ -579,25 +534,12 @@ export const OrderDetails: React.FC<Props> = ({
 
           {showNote && (
             <div className="order-info__buttons">
-              <ActionButton
-                className="action-button--local-delivery"
-                disabled={loading}
-                onClick={() => receiptRef?.current?.click()}
-              >
+              <ActionButton className="action-button--local-delivery" disabled={loading} onClick={() => receiptRef?.current?.click()}>
                 {receipt ? receipt.name : 'Selecione o arquivo'}
               </ActionButton>
-              <input
-                type="file"
-                ref={receiptRef}
-                style={{ display: 'none' }}
-                onChange={onReceiptChange}
-              />
+              <input type="file" ref={receiptRef} style={{ display: 'none' }} onChange={onReceiptChange} />
 
-              <ActionButton
-                className="action-button--withheld-invoice"
-                disabled={loading}
-                onClick={handleReceipt}
-              >
+              <ActionButton className="action-button--withheld-invoice" disabled={loading} onClick={handleReceipt}>
                 {loading ? 'Editando...' : 'Salvar'}
               </ActionButton>
             </div>
@@ -605,95 +547,42 @@ export const OrderDetails: React.FC<Props> = ({
 
           {showBar && (
             <div className="order-info__buttons">
-              {/* <h2 className="order-info__bar-code">
-              {barCode}
-            </h2> */}
+              <input type="text" onChange={onBarChange} className="action-input__barcode" placeholder="Digite o código de barras" />
 
-              <input
-                type="text"
-                onChange={onBarChange}
-                className="action-input__barcode"
-                placeholder="Digite o código de barras"
-              />
-
-              {/* <Scanner onDetected={onBarChange} /> */}
-
-              <ActionButton
-                className="action-button--withheld-invoice"
-                disabled={loading}
-                onClick={onBarSubmit}
-              >
+              <ActionButton className="action-button--withheld-invoice" disabled={loading} onClick={onBarSubmit}>
                 {loading ? 'Editando...' : 'Salvar'}
               </ActionButton>
             </div>
           )}
 
           <div className="order-info__buttons">
-            <ActionButton
-              className="action-button--withheld-invoice"
-              disabled={loading}
-              onClick={() => setShowBoxes(true)}
-            >
+            <ActionButton className="action-button--withheld-invoice" disabled={loading} onClick={() => setShowBoxes(true)}>
               Ver caixas
             </ActionButton>
 
             {!invoice?.invoice_number && (
-              <ActionButton
-                className="action-button--local-delivery"
-                disabled={loading}
-                onClick={() => onBarSelect()}
-              >
+              <ActionButton className="action-button--local-delivery" disabled={loading} onClick={() => onBarSelect()}>
                 Ler código de barras
               </ActionButton>
             )}
 
-            {/* {!invoice?.invoice_number && (
-              <ActionButton
-                className="action-button--local-delivery"
-                disabled={loading}
-                onClick={() => {
-                  setShowBar(false)
-                  setShowNote(prevState => (!prevState))
-                }}
-              >
-                Incluir nota
-              </ActionButton>
-            )} */}
-
-            <ActionButton
-              className="action-button--delete"
-              disabled={loading}
-              onClick={handleDeleteInvoice}
-            >
+            <ActionButton className="action-button--delete" disabled={loading} onClick={handleDeleteInvoice}>
               Excluir pedido
             </ActionButton>
 
-            <ActionButton
-              className="action-button--local-delivery"
-              disabled={loading}
-              onClick={() => setLocalDelivery()}
-            >
+            <ActionButton className="action-button--local-delivery" disabled={loading} onClick={() => setLocalDelivery()}>
               {loading ? 'Editando...' : 'Entrega Local'}
             </ActionButton>
 
-            <ActionButton
-              className="action-button--withheld-invoice"
-              onClick={() => {
+            <ActionButton className="action-button--withheld-invoice" onClick={() => {
                 if (invoice?.delivery_type === 'no-action') {
                   setInfoSelected('unfreeze-invoice');
                 } else {
                   setInfoSelected('freeze-invoice');
                 }
-              }}
-            >
-              {invoice?.delivery_type === 'no-action'
-                ? 'Liberar nota'
-                : 'Reter nota'}
+              }}>
+              {invoice?.delivery_type === 'no-action' ? 'Liberar nota' : 'Reter nota'}
             </ActionButton>
-
-            {/* <ActionButton onClick={() => setInfoSelected('add-boxes')}>
-              Incluir volume
-            </ActionButton> */}
           </div>
         </div>
       </>
@@ -703,11 +592,7 @@ export const OrderDetails: React.FC<Props> = ({
   const renderIncidents = () => {
     return (
       <Incidents>
-        <Goback
-          src={left_arrow}
-          alt="voltar"
-          onClick={() => setInfoSelected('order-info')}
-        />
+        <Goback src={left_arrow} alt="voltar" onClick={() => setInfoSelected('order-info')} />
 
         <div className="incidents__title">Ocorrências</div>
 
@@ -715,8 +600,6 @@ export const OrderDetails: React.FC<Props> = ({
           <thead>
             <tr>
               <th>Data</th>
-
-              {/* <th>Operador</th> */}
 
               <th>Tipo de ocorrencia</th>
 
@@ -726,53 +609,37 @@ export const OrderDetails: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {occurrences && occurrences?.length > 0 ? (
-              occurrences.map(
-                ({ updated_at, type, description, image_url }) => {
-                  return (
-                    <tr>
-                      <td data-label="Data">
-                        {new Date(updated_at).toLocaleString()}
+            {occurrences && occurrences.length > 0 ? (
+              occurrences.map((occ, idx) => {
+                return (
+                  <tr key={occ.id || idx}>
+                    <td data-label="Data">{new Date(occ.updated_at).toLocaleString()}</td>
+
+                    <td data-label="Tipo de ocorrência">{occ.type}</td>
+
+                    <td data-label="Observação">{occ.description}</td>
+
+                    {occ.image_url && (
+                      <td data-label="Image">
+                        <button
+                          type="button"
+                          className="occurrence-image__button"
+                          onClick={() => {
+                            setActiveImage(occ.image_url || '');
+                            setInfoSelected('incident-image');
+                          }}
+                        >
+                          Ver imagem
+                        </button>
                       </td>
-
-                      {/* <td data-label="Operador">Marcelo</td> */}
-
-                      {/* <td data-label="Cliente">Rua do Louvre, 555</td> */}
-
-                      <td data-label="Tipo de ocorrência">{type}</td>
-
-                      <td data-label="Observação">{description}</td>
-
-                      {image_url && (
-                        <td data-label="Image">
-                          <button
-                            type="button"
-                            className="occurrence-image__button"
-                            onClick={() => {
-                              if (image_url) {
-                                setActiveImage(image_url);
-
-                                setInfoSelected('incident-image');
-                              }
-                            }}
-                          >
-                            Ver imagem
-                          </button>
-                        </td>
-                      )}
-                      {/*
-                <td>
-                  <SeeImage>
-                    <img src={img_icon} alt="foto" />
-                    Imagem
-                  </SeeImage>
-                </td> */}
-                    </tr>
-                  );
-                },
-              )
+                    )}
+                  </tr>
+                );
+              })
             ) : (
-              <tr>Nenhuma ocorrência encontada</tr>
+              <tr>
+                <td colSpan={4}>Nenhuma ocorrência encontrada</td>
+              </tr>
             )}
           </tbody>
         </Table>
@@ -783,12 +650,8 @@ export const OrderDetails: React.FC<Props> = ({
   const renderIncidentImage = () => {
     return (
       <Incidents>
-        <Goback
-          src={left_arrow}
-          alt="voltar"
-          onClick={() => setInfoSelected('incidents-list')}
-        />
-        <img src={activeImage} alt="Occurrence" className="incident__image" />
+        <Goback src={left_arrow} alt="voltar" onClick={() => setInfoSelected('incidents-list')} />
+        {activeImage ? <img src={activeImage} alt="Occurrence" className="incident__image" /> : <div>Nenhuma imagem</div>}
       </Incidents>
     );
   };
@@ -796,71 +659,41 @@ export const OrderDetails: React.FC<Props> = ({
   const renderAddIncident = () => {
     return (
       <AddIncident className="new-incident">
-        <Goback
-          src={left_arrow}
-          alt="voltar"
-          onClick={() => setInfoSelected('order-info')}
-        />
+        <Goback src={left_arrow} alt="voltar" onClick={() => setInfoSelected('order-info')} />
 
         <div className="add-incident__title">Nova ocorrencia de pedido</div>
 
         <div className="add-incident__field-group">
           <Label className="field-label">
             Tipo de ocorrência
-            <input
-              type="text"
-              className="field-label__input"
-              onChange={(e) =>
-                setOccurrenceData({ ...occurrenceData, type: e.target.value })
-              }
-            />
+            <input type="text" className="field-label__input" onChange={(e) => setOccurrenceData({ ...occurrenceData, type: e.target.value })} />
           </Label>
         </div>
 
         <div className="add-incident__field-group">
           <Label className="field-label extended">
             Descrição
-            <input
-              type="text"
-              className="field-label__input"
-              onChange={(e) =>
-                setOccurrenceData({
-                  ...occurrenceData,
-                  description: e.target.value,
-                })
-              }
-            />
+            <input type="text" className="field-label__input" onChange={(e) => setOccurrenceData({ ...occurrenceData, description: e.target.value })} />
           </Label>
         </div>
 
         <div className="add-incident__field-group">
           <Label className="field-label extended">
             Imagem
-            <p className="field-label-value">
-              {occurrenceData?.image
-                ? occurrenceData?.image?.name
-                : 'Selecione a imagem'}
-            </p>
+            <p className="field-label-value">{occurrenceData?.image ? occurrenceData?.image?.name : 'Selecione a imagem'}</p>
             <input
               type="file"
               style={{ display: 'none' }}
               className="field-label__input"
               onChange={(e) => {
-                const { files } = e.target;
+                const files = e.target.files;
 
                 if (files && files.length > 0) {
-                  setOccurrenceData((prevState) => ({
-                    ...prevState,
-                    image: files[0],
-                  }));
-
+                  setOccurrenceData((prevState) => ({ ...prevState, image: files[0] }));
                   return;
                 }
 
-                setOccurrenceData((prevState) => ({
-                  ...prevState,
-                  image: undefined,
-                }));
+                setOccurrenceData((prevState) => ({ ...prevState, image: undefined }));
               }}
             />
           </Label>
@@ -877,9 +710,7 @@ export const OrderDetails: React.FC<Props> = ({
   const renderOrderOperatorsList = () => {
     return (
       <OrderOperators className="order-operators ">
-        <div className="order-operators__title">
-          Usuários operadores de pedido
-        </div>
+        <div className="order-operators__title">Usuários operadores de pedido</div>
 
         <Table className="table">
           <thead>
@@ -888,31 +719,25 @@ export const OrderDetails: React.FC<Props> = ({
 
               <th>Operador</th>
 
-              {/* <th>Perfil</th> */}
-
               <th>Tipo de operação</th>
 
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {operators?.length > 0 ? (
-              operators?.map((item) => (
-                <tr>
+            {operators && operators.length > 0 ? (
+              operators.map((item, idx) => (
+                <tr key={item.updated_at + idx}>
                   <td data-label="Data">{dateMask(item?.updated_at)}</td>
 
-                  <td data-label="Operador">
-                    {item?.user?.individual_person?.name}
-                  </td>
-
-                  {/* <td data-label="Perfil">{item?.step}</td> */}
+                  <td data-label="Operador">{item?.user?.individual_person?.name}</td>
 
                   <td data-label="Tipo de operação">{item?.step}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td data-label="Data">Nenhuma operação encontrada!</td>
+                <td colSpan={4}>Nenhuma operação encontrada!</td>
               </tr>
             )}
           </tbody>
@@ -924,55 +749,26 @@ export const OrderDetails: React.FC<Props> = ({
   const renderFreezeInvoice = () => {
     return (
       <AddIncident className="new-incident">
-        <Goback
-          src={left_arrow}
-          alt="voltar"
-          onClick={() => setInfoSelected('order-info')}
-        />
+        <Goback src={left_arrow} alt="voltar" onClick={() => setInfoSelected('order-info')} />
 
         <div className="add-incident__title">Reter nota</div>
 
         <div className="add-incident__field-group">
           <Label className="field-label">
             Motivo
-            <input
-              type="text"
-              className="field-label__input"
-              onChange={(e) =>
-                setFreezeInvoice({
-                  ...freezeInvoice,
-                  note: e.target.value,
-                })
-              }
-            />
+            <input type="text" className="field-label__input" onChange={(e) => setFreezeInvoice({ ...freezeInvoice, note: e.target.value })} />
           </Label>
 
           <Label className="field-label">
             Data do agendamento
-            <DatePicker
-              onChange={handleDate}
-              placeholder="dd/mm/aaa"
-              format={dateFormat}
-              showToday={false}
-              locale={locale}
-              showTime={{ format: 'HH:mm' }}
-            />
+            <DatePicker onChange={handleDate} placeholder="dd/mm/aaa" format={dateFormat} showToday={false} locale={locale} showTime={{ format: 'HH:mm' }} />
           </Label>
         </div>
 
         <div className="add-incident__field-group">
           <Label className="field-label extended">
             Observação
-            <input
-              type="text"
-              className="field-label__input"
-              onChange={(e) =>
-                setFreezeInvoice({
-                  ...freezeInvoice,
-                  reason: e.target.value,
-                })
-              }
-            />
+            <input type="text" className="field-label__input" onChange={(e) => setFreezeInvoice({ ...freezeInvoice, reason: e.target.value })} />
           </Label>
         </div>
 
@@ -985,53 +781,30 @@ export const OrderDetails: React.FC<Props> = ({
   };
 
   const renderUnfreezeInvoice = () => {
-    const occurrence = occurrences
-      ? occurrences[occurrences.length - 1]
-      : undefined;
+    const occurrence = occurrences && occurrences.length ? occurrences[occurrences.length - 1] : undefined;
 
     return (
       <AddIncident className="new-incident">
-        <Goback
-          src={left_arrow}
-          alt="voltar"
-          onClick={() => setInfoSelected('order-info')}
-        />
+        <Goback src={left_arrow} alt="voltar" onClick={() => setInfoSelected('order-info')} />
 
         <div className="add-incident__title">Liberar nota</div>
 
         <div className="add-incident__field-group">
           <Label className="field-label">
             Motivo
-            <input
-              type="text"
-              className="field-label__input"
-              defaultValue={occurrence?.description}
-              disabled
-            />
+            <input type="text" className="field-label__input" defaultValue={occurrence?.description} disabled />
           </Label>
 
           <Label className="field-label">
             Data do agendamento
-            <DatePicker
-              placeholder="dd/mm/aaa"
-              format={'DD/MM/YYYY HH:mm'}
-              showToday={false}
-              locale={locale}
-              disabled
-              defaultValue={moment(invoice?.appointment_date)}
-            />
+            <DatePicker placeholder="dd/mm/aaa" format={'DD/MM/YYYY HH:mm'} showToday={false} locale={locale} disabled defaultValue={moment(invoice?.appointment_date)} />
           </Label>
         </div>
 
         <div className="add-incident__field-group">
           <Label className="field-label extended">
             Observação
-            <input
-              type="text"
-              className="field-label__input"
-              defaultValue={occurrence?.type}
-              disabled
-            />
+            <input type="text" className="field-label__input" defaultValue={occurrence?.type} disabled />
           </Label>
         </div>
 
@@ -1046,17 +819,13 @@ export const OrderDetails: React.FC<Props> = ({
   const boxSelection = () => {
     return (
       <>
-        <Goback
-          src={left_arrow}
-          alt="voltar"
-          onClick={() => setInfoSelected('order-info')}
-        />
+        <Goback src={left_arrow} alt="voltar" onClick={() => setInfoSelected('order-info')} />
         <BoxSelect disableSelect={false} edit={false} invoiceID={invoice?.id} />
       </>
     );
   };
 
-  const handleSelectedInfo = (infoSelected: string) => {
+  const handleSelectedInfo = (info: string) => {
     const panel: { [key: string]: any } = {
       'order-info': renderOrderInformations(),
       'incidents-list': renderIncidents(),
@@ -1068,7 +837,7 @@ export const OrderDetails: React.FC<Props> = ({
       'unfreeze-invoice': renderUnfreezeInvoice(),
     };
 
-    return panel[infoSelected];
+    return panel[info];
   };
 
   if (isLoadingInvoice) {
@@ -1077,26 +846,15 @@ export const OrderDetails: React.FC<Props> = ({
 
   return (
     <Container className="order-details">
-      <Close className="close" onClick={() => setShowOrderDetails(false)}>
-        {'\u00D7'}
-      </Close>
+      <Close className="close" onClick={() => setShowOrderDetails(false)}>{'\u00D7'}</Close>
 
       <OrderInfo className="order-info">
         <div className="order-info__buttons-wrapper">
-          <div
-            className={`order-info__tab-button ${infoSelected !== 'order-operators-list' && 'active'
-              }`}
-            onClick={() => setInfoSelected('order-info')}
-          >
+          <div className={`order-info__tab-button ${infoSelected !== 'order-operators-list' ? 'active' : ''}`} onClick={() => setInfoSelected('order-info')}>
             Prontuário do Pedido
           </div>
 
-          <div
-            className={`order-info__tab-button ${infoSelected === 'order-operators-list' && 'active'
-              }
-            )}`}
-            onClick={() => setInfoSelected('order-operators-list')}
-          >
+          <div className={`order-info__tab-button ${infoSelected === 'order-operators-list' ? 'active' : ''}`} onClick={() => setInfoSelected('order-operators-list')}>
             Usuários Operadores
           </div>
         </div>
@@ -1115,17 +873,12 @@ export const OrderDetails: React.FC<Props> = ({
       )}
 
       {showBoxes && (
-        <InfoModal
-          key="get-boxes-modal"
-          openModal={showBoxes}
-          setOpenModal={setShowBoxes}
-        >
-          <BoxesList
-            invoiceID={invoice?.id}
-            setShowOrderDetails={setShowBoxes}
-          />
+        <InfoModal key="get-boxes-modal" openModal={showBoxes} setOpenModal={setShowBoxes}>
+          <BoxesList invoiceID={invoice?.id} setShowOrderDetails={setShowBoxes} />
         </InfoModal>
       )}
     </Container>
   );
 };
+
+export default OrderDetails;
