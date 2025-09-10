@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import GoogleMapReact from 'google-map-react';
+import { GoogleMap, Marker } from "@react-google-maps/api";
+
 
 import { toast } from 'react-toastify';
 import api from '../../services/api';
