@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 
 import api from '../services/api';
+import { AxiosResponse } from 'axios';
 
 interface User {
   id: string;
@@ -50,30 +51,21 @@ const AuthProvider: React.FC = ({ children }) => {
   };
 
   const [data, setData] = useState<AuthState>(() => {
-    const saveLogin =
-      !!localStorage.getItem('@Selad-adm:access_token') || false;
+    const savedToken = localStorage.getItem('@Selad-adm:access_token');
+    const savedUser = localStorage.getItem('@Selad-adm:user');
+    const savedRefreshToken = localStorage.getItem('@Selad-adm:refresh_token');
 
-    let access_token;
-    let refresh_token;
-    let user;
-
-    if (saveLogin) {
-      access_token = localStorage.getItem('@Selad-adm:access_token') || '';
-      refresh_token = localStorage.getItem('@Selad-adm:refresh_token') || '';
-      user = localStorage.getItem('@Selad-adm:user') || '{}';
-    } else {
-      access_token = sessionStorage.getItem('@Selad-adm:access_token') || '';
-      refresh_token = sessionStorage.getItem('@Selad-adm:refresh_token') || '';
-      user = sessionStorage.getItem('@Selad-adm:user') || '{}';
+    if (savedToken && savedUser && savedRefreshToken) {
+      setTokenOnApiHeaders(savedToken);
+      return { access_token: savedToken, user: JSON.parse(savedUser), refresh_token: savedRefreshToken, saveLogin: true };
     }
 
-    if (access_token) {
-      return {
-        access_token,
-        refresh_token,
-        user: JSON.parse(user),
-        saveLogin,
-      };
+    const sessionToken = sessionStorage.getItem('@Selad-adm:access_token');
+    const sessionUser = sessionStorage.getItem('@Selad-adm:user');
+
+    if (sessionToken && sessionUser) {
+      setTokenOnApiHeaders(sessionToken);
+      return { access_token: sessionToken, user: JSON.parse(sessionUser), saveLogin: false };
     }
 
     return {} as AuthState;
@@ -86,53 +78,25 @@ const AuthProvider: React.FC = ({ children }) => {
         password,
       });
 
-      const { user } = response.data;
-      const access_token = response.data.access_token;
-      const refresh_token = response.data.refresh_token;
+      const { user, access_token, refresh_token } = response.data;
 
       if (saveLogin) {
-        setData({ access_token, refresh_token, user, saveLogin });
+        localStorage.setItem('@Selad-adm:access_token', access_token);
+        localStorage.setItem('@Selad-adm:user', JSON.stringify(user));
+        localStorage.setItem('@Selad-adm:refresh_token', refresh_token);
       } else {
-        setData({ access_token, user, saveLogin });
+        sessionStorage.setItem('@Selad-adm:access_token', access_token);
+        sessionStorage.setItem('@Selad-adm:user', JSON.stringify(user));
       }
 
+      setData({ access_token, refresh_token, user, saveLogin });
       setTokenOnApiHeaders(access_token);
     },
     [],
   );
 
-  const updateLocalStorage = () => {
-    if (JSON.stringify(data) === '{}') {
-      localStorage.removeItem('@Selad-adm:access_token');
-      localStorage.removeItem('@Selad-adm:refresh_token');
-      localStorage.removeItem('@Selad-adm:user');
-      localStorage.removeItem('@Selad-adm:saveLogin');
-      sessionStorage.removeItem('@Selad-adm:access_token');
-      sessionStorage.removeItem('@Selad-adm:refresh_token');
-      sessionStorage.removeItem('@Selad-adm:user');
-      return;
-    }
 
-    if (data.saveLogin) {
-      localStorage.setItem('@Selad-adm:access_token', data.access_token || '');
-      localStorage.setItem(
-        '@Selad-adm:refresh_token',
-        data.refresh_token || '',
-      );
-      localStorage.setItem('@Selad-adm:user', JSON.stringify(data.user) || '');
-      localStorage.setItem('@Selad-adm:saveLogin', data.saveLogin.toString());
-    } else {
-      sessionStorage.setItem(
-        '@Selad-adm:access_token',
-        data.access_token || '',
-      );
-      sessionStorage.setItem(
-        '@Selad-adm:user',
-        JSON.stringify(data.user) || '',
-      );
-      localStorage.setItem('@Selad-adm:saveLogin', 'false');
-    }
-  };
+
 
   const signOut = useCallback(() => {
     setData({} as AuthState);
@@ -146,7 +110,7 @@ const AuthProvider: React.FC = ({ children }) => {
           .put('/sessions/refresh-token', {
             refresh_token,
           })
-          .then((res: any) => {
+          .then((res: AxiosResponse<AuthResponse>) => {
             setData({
               ...data,
               refresh_token: res.data.refresh_token,
@@ -154,12 +118,10 @@ const AuthProvider: React.FC = ({ children }) => {
             });
 
             setTokenOnApiHeaders(res.data.access_token);
-            window.location.reload();
             return res;
           })
-          .catch((err: any) => {
+          .catch((err: AxiosError) => {
             signOut();
-            window.location.reload();
             return err;
           });
       } catch (err) {
@@ -168,9 +130,7 @@ const AuthProvider: React.FC = ({ children }) => {
     });
   };
 
-  useEffect(() => {
-    updateLocalStorage();
-  }, [data]);
+
 
   return (
     <AuthContext.Provider
@@ -199,3 +159,12 @@ function useAuth(): AuthContextData {
 }
 
 export { AuthProvider, useAuth };
+
+
+interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  user: User;
+}
+
+
