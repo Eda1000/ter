@@ -148,7 +148,7 @@ export const Routes = () => (
         isPrivate
       />
       <Route Component={EditUsers} path="/editar-usuarios" exact isPrivate />
-      {/* <Route Component={CreateRoles} path="/cadastrar-funcao" exact isPrivate /> */}
+
       <Route
         Component={ListDeliveryReceipts}
         path="/comprovantes"
