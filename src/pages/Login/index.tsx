@@ -11,7 +11,7 @@ import backgroundImg from '../../assets/general/background.svg';
 import { Container, Form, SideTruck, SaveLogin } from './styles';
 
 import { useAuth } from '../../hooks/Auth';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 export interface Geocode {
   results: Result[];
@@ -51,7 +51,7 @@ export const Login = () => {
       val.replace(' ', '+');
 
       const { data } = await axios.get<Geocode>(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${val}&key=AIzaSyAVZHZLREXZLj_HZnHS0hT_jTq4PpPqyo4`,
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${val}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`,
       );
 
       setResponse(data.results);
@@ -85,7 +85,7 @@ export const Login = () => {
     }
   }
 
-  const handleError = async (error: any) => {
+  const handleError = async (error: Error | AxiosError) => {
     let message;
     if (error?.response?.data?.message) {
       message = error?.response?.data.message;
@@ -145,7 +145,7 @@ export const Login = () => {
                 />
                 Salvar login
               </label>
-              {/* <a href="/">Esqueceu a senha?</a> */}
+
             </SaveLogin>
           </Form>
         </div>
