@@ -81,3 +81,8 @@
     "react-error-overlay": "6.0.9"
   }
 }
+"scripts": {
+  "dev": "NODE_OPTIONS=--openssl-legacy-provider vite",
+  "build": "NODE_OPTIONS=--openssl-legacy-provider vite build",
+  "start": "NODE_OPTIONS=--openssl-legacy-provider vite preview"
+}
