@@ -1,35 +1,24 @@
 import styled from "styled-components";
 
-interface ContainerProps {
-  isSelected?: boolean;
-}
-
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  align-items: flex-start;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 6px;
+  background: #fafafa;
+  width: 200px;
 
-  button {
-    padding: 6px 12px;
-    margin: 4px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background: #2196f3;
-    color: white;
-
-    &:hover {
-      background: #1976d2;
-    }
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: bold;
   }
-`;
 
-export const IconWrapper = styled.div<ContainerProps>`
-  margin-top: 10px;
-  font-size: 22px;
-  color: ${({ isSelected }) => (isSelected ? "#4caf50" : "#ccc")};
+  p {
+    margin: 2px 0;
+    font-size: 14px;
+  }
 `;
