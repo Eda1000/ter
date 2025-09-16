@@ -1,19 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { ToastContainer } from 'react-toastify';
-import 'antd/dist/antd.css';
-import { Routes } from './routes';
-import { GlobalStyle } from './styles/global';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import AppProvider from './hooks/index';
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
 
-ReactDOM.render(
+root.render(
   <React.StrictMode>
-    <AppProvider>
-      <Routes />
-      <GlobalStyle />
-    </AppProvider>
-    <ToastContainer autoClose={3000} />
-  </React.StrictMode>,
-  document.getElementById('root'),
+    <App />
+    <ToastContainer />
+  </React.StrictMode>
 );
