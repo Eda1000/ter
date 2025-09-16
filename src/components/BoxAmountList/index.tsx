@@ -10,7 +10,8 @@ import { VscSearch } from 'react-icons/vsc';
 import { Invoice } from '../../Interfaces/HomeInterface';
 import { Boxes } from '../../hooks/Boxes';
 import api from '../../services/api';
-import { BoxAmount } from '../BoxAmount';
+import BoxAmount from '../BoxAmount'; ✅
+
 import { Spinner } from '../Spinner/Spinner';
 
 import { Pagination } from 'antd';
