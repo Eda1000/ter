@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { FaCheck } from "react-icons/fa";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import boxImg from "../../assets/box/box2.png";
+import "./styles.css";
 
-function Box() {
+export default function Box() {
   const [selected, setSelected] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleSelect = () => {
     setSelected(true);
@@ -15,20 +16,24 @@ function Box() {
   };
 
   const handleNext = () => {
-    history.push("/home");
+    if (selected) {
+      navigate("/next");
+    } else {
+      toast.error("Selecione uma caixa antes de continuar.");
+    }
   };
 
   return (
     <div className="box-container">
       <img src={boxImg} alt="Box" className="box-img" />
+
       <button onClick={handleSelect} className="btn-select">
         <FaCheck /> Selecionar
       </button>
+
       <button onClick={handleNext} className="btn-next">
         Próximo
       </button>
     </div>
   );
 }
-
-export default Box;
