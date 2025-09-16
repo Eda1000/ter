@@ -1,31 +1,19 @@
-import React, { useState } from "react";
-import { FaCheck } from "react-icons/fa";
+import React from "react";
+import { Container } from "./styles";
 import boxImg from "../../assets/box.png";
-import { Container, BoxImage, Button } from "./styles";
 
-// Corrige tipagem do ícone
-const CheckIcon = FaCheck as unknown as React.FC;
+interface BoxProps {
+  title: string;
+  onClick?: () => void;
+}
 
-const Box: React.FC = () => {
-  const [selected, setSelected] = useState(false);
-
-  const handleSelect = () => {
-    setSelected(!selected);
-  };
-
-  const handleNext = () => {
-    console.log("Próximo box selecionado");
-  };
-
+const Box: React.FC<BoxProps> = ({ title, onClick }) => {
   return (
-    <Container>
-      <BoxImage src={boxImg} alt="Box" />
-      <Button selected={selected} onClick={handleSelect}>
-        <CheckIcon /> Selecionar
-      </Button>
-      <Button onClick={handleNext}>Próximo</Button>
+    <Container onClick={onClick}>
+      <img src={boxImg} alt="box" />
+      <p>{title}</p>
     </Container>
   );
 };
 
-export default Box;
+export default Box; // 👈 agora é export default
