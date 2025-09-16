@@ -8,25 +8,28 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 `;
 
 export const BoxImage = styled.img`
-  width: 200px;
+  width: 120px;
   height: auto;
 `;
 
 export const Button = styled.button<ButtonProps>`
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: ${(props) => (props.selected ? "#4caf50" : "#1976d2")};
-  color: white;
-  font-size: 1rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background: ${({ selected }) => (selected ? "#4caf50" : "#2196f3")};
+  color: white;
 
   &:hover {
     opacity: 0.9;
