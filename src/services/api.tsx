@@ -1,12 +1,13 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API,
+  baseURL: "http://localhost:3333", // ajuste sua URL
 });
 
-api.interceptors.request.use(async (config) => {
-  const token = localStorage.getItem('@Selad-adm:access_token') || '';
+api.interceptors.request.use((config: any) => {
+  const token = localStorage.getItem("@Selad-adm:access_token");
   if (token) {
+    config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
