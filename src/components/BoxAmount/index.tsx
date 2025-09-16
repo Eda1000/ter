@@ -18,4 +18,4 @@ const BoxAmount: React.FC<BoxAmountProps> = ({ id, name, quantity, cubage }) => 
   );
 };
 
-export default BoxAmount; // 👈 export default
+export default BoxAmount;
