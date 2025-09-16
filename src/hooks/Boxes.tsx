@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { useAuth } from "./Auth";
 
-interface Boxes {
+export interface IBox {
   id: string;
   name: string;
+  quantity?: number;
+  cubage?: number;
 }
 
 interface BoxesContextData {
-  boxes: Boxes[];
-  setBoxes: React.Dispatch<React.SetStateAction<Boxes[]>>;
+  boxes: IBox[];
+  setBoxes: React.Dispatch<React.SetStateAction<IBox[]>>;
 }
 
 interface Props {
@@ -18,8 +19,7 @@ interface Props {
 const BoxesContext = createContext<BoxesContextData>({} as BoxesContextData);
 
 const BoxesProvider: React.FC<Props> = ({ children }) => {
-  const { user } = useAuth();
-  const [boxes, setBoxes] = useState<Boxes[]>([]);
+  const [boxes, setBoxes] = useState<IBox[]>([]);
 
   return (
     <BoxesContext.Provider value={{ boxes, setBoxes }}>
