@@ -16,4 +16,4 @@ const Box: React.FC<BoxProps> = ({ title, onClick }) => {
   );
 };
 
-export default Box; // 👈 agora é export default
+export default Box;
