@@ -1,39 +1,37 @@
-import { useState } from "react";
-import { toast } from "react-toastify";
+import React, { useState } from "react";
 import { FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import boxImg from "../../assets/box/box2.png";
-import "./styles.css";
+import { Container, BoxImage, Button } from "./styles";
 
-export default function Box() {
+const Box: React.FC = () => {
   const [selected, setSelected] = useState(false);
   const navigate = useNavigate();
 
   const handleSelect = () => {
-    setSelected(true);
+    setSelected(!selected);
     toast.success("Caixa selecionada!");
   };
 
   const handleNext = () => {
-    if (selected) {
-      navigate("/next");
-    } else {
-      toast.error("Selecione uma caixa antes de continuar.");
+    if (!selected) {
+      toast.error("Selecione a caixa primeiro!");
+      return;
     }
+    navigate("/home");
   };
 
   return (
-    <div className="box-container">
-      <img src={boxImg} alt="Box" className="box-img" />
-
-      <button onClick={handleSelect} className="btn-select">
+    <Container>
+      <BoxImage src={boxImg} alt="Box" />
+      <Button selected={selected} onClick={handleSelect}>
         <FaCheck /> Selecionar
-      </button>
-
-      <button onClick={handleNext} className="btn-next">
-        Próximo
-      </button>
-    </div>
+      </Button>
+      <Button onClick={handleNext}>Próximo</Button>
+    </Container>
   );
-}
+};
+
+export default Box;
