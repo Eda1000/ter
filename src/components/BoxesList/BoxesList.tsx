@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 import Box from '../Box'; ✅
 
-import { Boxes } from '../../hooks/Boxes';
+
 import api from '../../services/api';
 
 import { Container, BoxContainer, BoxesSection, HeaderBoxes, Close } from './styles';
