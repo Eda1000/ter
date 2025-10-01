@@ -19,6 +19,12 @@ import { Invoice } from '../../Interfaces/HomeInterface';
 import { Container, Content } from './styles';
 import { ListInvoice } from '../../Interfaces/ListInvoices';
 
+interface InvoicesViewResponse {
+  results: ListInvoice[];
+  page: number;
+  total: number;
+}
+
 export const Home = () => {
   const { data } = useAuth();
 
@@ -39,7 +45,7 @@ export const Home = () => {
     try {
       console.log(querySearch);
 
-      const response = await api.get(`invoices/view${querySearch || ''}`, {
+      const response = await api.get<InvoicesViewResponse>(`invoices/view${querySearch || ''}`, {
         params: {
           page,
           limit: 5,
