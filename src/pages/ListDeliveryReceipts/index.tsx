@@ -83,9 +83,11 @@ export const ListDeliveryReceipts = () => {
       headers:{ Authorization: `Bearer ${data.access_token}` }
     }).then((response) => {
       setReceiptsData(response.data)
+      setLoading(false);
     }).catch((err) => {
       handleError(err.response.data?.message || err.toString());
-    }).finally(() => setLoading(false))
+      setLoading(false);
+    })
   }
 
   const handleError = (err: string) => {
