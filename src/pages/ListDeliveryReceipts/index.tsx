@@ -79,7 +79,7 @@ export const ListDeliveryReceipts = () => {
     setLoading(true);
     const url = searchInvoice === '' ? `invoice-receipts?page=${currentPage}&limit=7` : `invoice-receipts?invoice_number=${searchInvoice}`
 
-    api.get(url,{
+    api.get<IReceiptsData>(url,{
       headers:{ Authorization: `Bearer ${data.access_token}` }
     }).then((response) => {
       setReceiptsData(response.data)
