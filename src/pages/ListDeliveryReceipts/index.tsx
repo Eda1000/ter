@@ -1,5 +1,5 @@
 import { useState, useEffect, MouseEvent } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../hooks/Auth';
 
@@ -64,7 +64,7 @@ interface IReceipt {
 
 export const ListDeliveryReceipts = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [ receiptsData, setReceiptsData ] = useState({} as IReceiptsData)
   const [ currentPage, setCurrentPage ] = useState(1)
@@ -95,7 +95,7 @@ export const ListDeliveryReceipts = () => {
   const handleEditReceipt = (event: MouseEvent<HTMLElement>, receiptId: string) => {
     event.preventDefault()
 
-    history.push(`/editar-comprovante/${receiptId}`)
+    navigate(`/editar-comprovante/${receiptId}`)
   }
 
   const PaginationContainer = () => {
