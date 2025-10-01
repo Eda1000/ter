@@ -177,7 +177,7 @@ export const ListDeliveryReceipts = () => {
                           download
                           onClick={(event) => event.stopPropagation()}
                         >
-                          <FileName>{receipt.image}</FileName>
+                          <FileName>{receipt.image.name}</FileName>
                           <img src={download_icon} alt="ícone fazer download" />
                         </DownloadWrapper>
                       </td>
