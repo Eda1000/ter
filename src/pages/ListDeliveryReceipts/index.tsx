@@ -84,9 +84,11 @@ export const ListDeliveryReceipts = () => {
     }).then((response) => {
       setReceiptsData(response.data)
       setLoading(false);
+      setLoading(false);
     }).catch((err) => {
       handleError(err.response.data?.message || err.toString());
       setLoading(false);
+    })
     })
   }
 
