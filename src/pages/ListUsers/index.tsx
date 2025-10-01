@@ -36,6 +36,12 @@ interface UsersInterface {
   };
 }
 
+interface UsersApiResponse {
+  results: UsersInterface[];
+  page: number;
+  total: number;
+}
+
 export const ListUsers = () => {
   const { data } = useAuth();
   const history = useHistory();
@@ -49,7 +55,7 @@ export const ListUsers = () => {
   useEffect(() => {
     setLoading(true);
 
-    api.get(`/users?page=${page}&limit=10`,{
+    api.get<UsersApiResponse>(`/users?page=${page}&limit=10`,{
       headers:{
         Authorization: `Bearer ${data.access_token}`
       }
@@ -70,12 +76,12 @@ export const ListUsers = () => {
   const searchUsers = async () => {
     const headers = { Authorization: `Bearer ${data.access_token}` };
     if (usersSearch.trim() !== '') {
-      const res = await api.get(`/users?page=${page}&name=${usersSearch}`, {
+      const res = await api.get<UsersApiResponse>(`/users?page=${page}&name=${usersSearch}`, {
         headers,
       });
       setUsers(res.data.results);
     } else {
-      const res = await api.get(`/users?page=${page}&limit=10`, {
+      const res = await api.get<UsersApiResponse>(`/users?page=${page}&limit=10`, {
         headers,
       });
       setUsers(res.data.results);
@@ -90,7 +96,7 @@ export const ListUsers = () => {
 
   async function handleChangePage(e: number) {
     const headers = { Authorization: `Bearer ${data.access_token}` };
-    const res = await api.get(`/users?page=${e}&limit=10`, {
+    const res = await api.get<UsersApiResponse>(`/users?page=${e}&limit=10`, {
       headers,
     });
 

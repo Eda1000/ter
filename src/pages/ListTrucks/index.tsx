@@ -35,6 +35,12 @@ interface TrucksInterface {
   created_at: string;
 }
 
+interface TrucksApiResponse {
+  results: TrucksInterface[];
+  page: number;
+  total: number;
+}
+
 export const ListTrucks = () => {
   const { data } = useAuth();
   const history = useHistory();
@@ -53,7 +59,7 @@ export const ListTrucks = () => {
     setLoading(true);
 
     try {
-      const res = await api.get(`/trucks?page=${page}&limit=10`);
+      const res = await api.get<TrucksApiResponse>(`/trucks?page=${page}&limit=10`);
 
       setTrucks(res.data.results);
       setPage(res.data.page);
@@ -67,10 +73,10 @@ export const ListTrucks = () => {
 
   const searchTrucks = async () => {
     if (truckSearch.trim() !== '') {
-      const res = await api.get(`/trucks?page=${page}&q=${truckSearch}`);
+      const res = await api.get<TrucksApiResponse>(`/trucks?page=${page}&q=${truckSearch}`);
       setTrucks(res.data.results);
     } else {
-      const res = await api.get(`/trucks?page=${page}&limit=10`);
+      const res = await api.get<TrucksApiResponse>(`/trucks?page=${page}&limit=10`);
       setTrucks(res.data.results);
     }
   };
@@ -82,7 +88,7 @@ export const ListTrucks = () => {
   };
 
   async function handleChangePage(e: number) {
-    const res = await api.get(`/trucks?page=${e}&limit=10`);
+    const res = await api.get<TrucksApiResponse>(`/trucks?page=${e}&limit=10`);
 
     setTrucks(res.data.results);
   }
