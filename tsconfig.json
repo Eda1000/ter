@@ -17,9 +17,8 @@
     "noEmit": true,
      "jsx": "react-jsx",
     "baseUrl": "src",
+    "types": ["react", "react-dom"],
     "paths": {
-    "jsx": "react-jsx",
-    "types": ["react", "react-dom"]
       "pages/*": ["pages/*"],
       "assets/*": ["assets/*"],
       "services/*": ["services/*"],
