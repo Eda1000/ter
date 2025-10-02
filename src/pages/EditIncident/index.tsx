@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
@@ -39,7 +39,7 @@ interface Params {
 
 export const EditIncident = () => {
   const { incidentID } = useParams<Params>();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
   const [incidentDescription, setIncidentDescription] = useState<string>('');
@@ -121,7 +121,7 @@ export const EditIncident = () => {
     toast.success(message);
 
     setTimeout(() => {
-      history.push('/ocorrencias');
+      navigate('/ocorrencias');
     }, 3000);
   };
 
