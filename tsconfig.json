@@ -18,7 +18,8 @@
      "jsx": "react-jsx",
     "baseUrl": "src",
     "paths": {
-      "components/*": ["components/*"],
+    "jsx": "react-jsx",
+    "types": ["react", "react-dom"]
       "pages/*": ["pages/*"],
       "assets/*": ["assets/*"],
       "services/*": ["services/*"],
