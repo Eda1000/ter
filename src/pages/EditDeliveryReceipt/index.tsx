@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/Auth';
 
 import api from '../../services/api';
 
-import { HiBadgeCheck } from 'react-icons/hi';
+import * as HiIcons from 'react-icons/hi';
 import clip_icon from '../../assets/general/clip_icon.svg';
 
 import { Header } from '../../components/Header';
@@ -167,7 +167,7 @@ export const EditDeliveryReceipt = () => {
 
             <MainButtons>
               <SaveButton type="submit">
-                <HiBadgeCheck size={24} />
+                <HiIcons.HiBadgeCheck size={24} />
                 Salvar
               </SaveButton>
               <Link to="/comprovantes">

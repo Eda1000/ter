@@ -4,7 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
-import { HiBadgeCheck } from 'react-icons/hi';
+import * as HiIcons from 'react-icons/hi';
 
 import { Header } from '../../components/Header';
 import { Sidebar } from '../../components/Sidebar';
@@ -300,7 +300,7 @@ export const EditBoxes = () => {
               <SaveButton onClick={() => handleSubmit()}>
                 {!loading ? (
                   <>
-                    <HiBadgeCheck />
+                    <HiIcons.HiBadgeCheck />
                     Salvar seção
                   </>
                 ) : (
