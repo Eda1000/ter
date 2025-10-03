@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/Auth';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
@@ -49,7 +49,7 @@ interface BoxDataInterface {
 }
 
 export const EditBoxes = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const { data, setData } = useAuth();
@@ -130,7 +130,7 @@ export const EditBoxes = () => {
       });
       setLoading(false);
       toast.success('Caixa editada com sucesso!');
-      history.push('/todas-as-caixas');
+      navigate('/todas-as-caixas');
     } catch (err) {
       handleError(err);
       setLoading(false);
@@ -148,7 +148,7 @@ export const EditBoxes = () => {
 
       setLoadingRemove(false);
       toast.success('Caixa removida!');
-      history.push('/todas-as-caixas');
+      navigate('/todas-as-caixas');
     } catch (err) {
       handleError(err);
       setLoadingRemove(false);
@@ -311,7 +311,7 @@ export const EditBoxes = () => {
                   <LoadingOutlined style={{ fontSize: 24 }} spin />
                 )}
               </SaveButton>
-              <BackButton onClick={() => history.push('/todas-as-caixas')}>
+              <BackButton onClick={() => navigate('/todas-as-caixas')}>
                 Cancelar
               </BackButton>
               <RemoveButton onClick={() => handleRemove(boxData.state.id)}>

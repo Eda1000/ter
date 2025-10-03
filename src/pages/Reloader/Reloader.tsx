@@ -7,7 +7,7 @@ export const Reloader: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    history.goBack();
+    navigate(-1);
   }, []);
 
   return <></>;

@@ -30,8 +30,8 @@ export const Marker = styled.div`
   width: 70px;
   height: 53px;
 
-  background: ${({ tagColor }: { tagColor: string }) =>
-    tagColor && `${tagColor}`};
+  background: ${(props: any) =>
+    props.tagColor && `${props.tagColor}`};
 
   mask-position: center;
   mask-repeat: no-repeat;
@@ -64,7 +64,7 @@ export const Number = styled.span`
   width: 25px;
   height: 25px;
 
-  color: ${({ tagColor }: { tagColor: string }) => tagColor && `${tagColor}`};
+  color: ${({ tagColor }: { tagColor: string }) => props.tagColor && `${props.tagColor}`};
 
   font-size: 18px;
   font-weight: bold;

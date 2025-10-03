@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import { Select } from 'antd';
 import { toast } from 'react-toastify';
@@ -47,7 +47,7 @@ interface RolesInterface {
 
 export const EditUsers = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const userData = location.state as UserDataInterface;
@@ -124,7 +124,7 @@ export const EditUsers = () => {
 
       setLoadingDelete(false);
       toast.success('Usuário removido!');
-      history.push('/listar-usuarios');
+      navigate('/listar-usuarios');
     } catch (err) {
       handleError(err);
       setLoadingDelete(false);
@@ -227,7 +227,7 @@ export const EditUsers = () => {
                   <LoadingOutlined style={{ fontSize: 24 }} spin />
                 )}
               </SaveButton>
-              <BackButton onClick={() => history.push('/listar-usuarios')}>
+              <BackButton onClick={() => navigate('/listar-usuarios')}>
                 Voltar
               </BackButton>
             </MainButtons>

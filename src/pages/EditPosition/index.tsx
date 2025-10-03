@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import { HiBadgeCheck } from 'react-icons/hi';
@@ -75,7 +75,7 @@ export interface Invoice {
 
 export const EditPosition = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const positionData = location.state as PositionDataInterface;
@@ -115,7 +115,7 @@ export const EditPosition = () => {
 
       toast.success('Posição alterada com sucesso!');
 
-      history.push('/todas-as-posicoes')
+      navigate('/todas-as-posicoes')
     } catch (err) {
       handleError(err);
     } finally {
@@ -131,7 +131,7 @@ export const EditPosition = () => {
 
       toast.success('Posição deletada com sucesso!');
 
-      history.push('/todas-as-posicoes')
+      navigate('/todas-as-posicoes')
     } catch (err) {
       handleError(err);
     } finally {
@@ -161,7 +161,7 @@ export const EditPosition = () => {
 
             <PageTitle>Adicionar posições</PageTitle>
 
-            <SeeAllPositionsButton type="button" onClick={() => history.push("/todas-as-posicoes")}>
+            <SeeAllPositionsButton type="button" onClick={() => navigate("/todas-as-posicoes")}>
               Ver todas as posições
             </SeeAllPositionsButton>
 
@@ -205,7 +205,7 @@ export const EditPosition = () => {
                   <LoadingOutlined style={{ fontSize: 24 }} spin />
                 )}
               </SaveButton>
-              <BackButton onClick={() => history.push('/todas-as-posicoes')}>
+              <BackButton onClick={() => navigate('/todas-as-posicoes')}>
                 Voltar
               </BackButton>
             </MainButtons>

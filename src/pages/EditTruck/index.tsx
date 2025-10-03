@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import { Select, Radio } from 'antd';
 import { toast } from 'react-toastify';
@@ -53,7 +53,7 @@ interface TruckDataInterface {
 
 export const EditTruck = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const truckData = location.state as TruckDataInterface;
@@ -152,7 +152,7 @@ export const EditTruck = () => {
 
       setLoadingDelete(false);
       toast.success('Caminhão removido!');
-      history.push('/caminhoes');
+      navigate('/caminhoes');
     } catch (err) {
       handleError(err);
       setLoadingDelete(false);
@@ -295,7 +295,7 @@ export const EditTruck = () => {
                   <LoadingOutlined style={{ fontSize: 24 }} spin />
                 )}
               </SaveButton>
-              <BackButton onClick={() => history.push('/caminhoes')}>
+              <BackButton onClick={() => navigate('/caminhoes')}>
                 Voltar
               </BackButton>
             </MainButtons>

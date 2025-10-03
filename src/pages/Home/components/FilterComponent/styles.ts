@@ -230,8 +230,8 @@ export const FilterButton = styled.button`
     background-size: contain;
     background-image: url(${chevron_down});
 
-    transform: ${({ collapsed }: { collapsed: boolean }) =>
-      collapsed ? 'scale(-1)' : 'scale(1)'};
+    transform: ${(props: any) =>
+      props.collapsed ? 'scale(-1)' : 'scale(1)'};
   }
 
   &:hover {
@@ -242,7 +242,7 @@ export const FilterButton = styled.button`
 `;
 
 export const FiltersWrapper = styled.div`
-  display: ${({ expand }: { expand: boolean }) => (expand ? 'flex' : 'none')};
+  display: ${(props: any) => (props.expand ? 'flex' : 'none')};
   flex-direction: column;
   gap: 20px;
 
@@ -289,8 +289,8 @@ export const SecondaryButton = styled.button`
   max-width: 120px;
   height: 40px;
 
-  color: ${({ active }: { active: boolean }) =>
-    active ? '#fff' : 'var(--blue)'};
+  color: ${(props: any) =>
+    props.active ? '#fff' : 'var(--blue)'};
   font-size: 12px;
 
   border: 0;

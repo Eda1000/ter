@@ -186,7 +186,7 @@ export const TagColor = styled.td`
 
     span {
       display: block;
-      background: ${({ color }: { color: string }) => color && `${color}`};
+      background: ${(props: any) => props.color && `${props.color}`};
       height: 15px;
       width: 30px;
       border-radius: 20px;

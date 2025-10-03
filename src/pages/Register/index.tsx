@@ -1,5 +1,5 @@
 import { FormEvent } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LoadingOutlined } from '@ant-design/icons';
 
 import logoImg from '../../assets/general/logo.svg';

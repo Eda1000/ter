@@ -107,7 +107,7 @@ export const RouteSequence = styled.div`
     width: 30px;
     height: 30px;
 
-    color: ${({ color }: { color: string }) => color && color};
+    color: ${(props: any) => props.color && props.color};
     font-size: 0.8rem;
     font-weight: bold;
 
@@ -117,7 +117,7 @@ export const RouteSequence = styled.div`
   }
 
   .starting-point {
-    background-color: ${({ color }: { color: string }) => color && color};
+    background-color: ${(props: any) => props.color && props.color};
 
     img {
       width: 50%;

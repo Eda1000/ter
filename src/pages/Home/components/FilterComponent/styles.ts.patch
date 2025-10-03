@@ -1,0 +1,31 @@
+--- a/src/pages/Home/components/FilterComponent/styles.ts
++++ b/src/pages/Home/components/FilterComponent/styles.ts
+@@ -230,7 +230,7 @@
+ 
+     background-image: url(${chevron_down});
+ 
+-    transform: ${({ collapsed }: { collapsed: boolean }) =>
++    transform: ${(props: any) =>
+-      collapsed ? 'scale(-1)' : 'scale(1)'};
++      props.collapsed ? 'scale(-1)' : 'scale(1)'};
+   }
+ 
+@@ -242,7 +242,7 @@
+ `;
+ 
+ export const FiltersWrapper = styled.div`
+-  display: ${({ expand }: { expand: boolean }) => (expand ? 'flex' : 'none')};
++  display: ${(props: any) => (props.expand ? 'flex' : 'none')};
+   flex-direction: column;
+   gap: 20px;
+ 
+@@ -289,8 +289,8 @@
+   height: 40px;
+ 
+-  color: ${({ active }: { active: boolean }) =>
+-    active ? '#fff' : 'var(--blue)'};
++  color: ${(props: any) =>
++    props.active ? '#fff' : 'var(--blue)'};
+   font-size: 12px;
+ 
+   border: 0;

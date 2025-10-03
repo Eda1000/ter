@@ -33,12 +33,8 @@ import {
   TitleRow,
 } from './styles';
 
-interface Params {
-  incidentID: string;
-}
-
 export const EditIncident = () => {
-  const { incidentID } = useParams<Params>();
+  const { incidentID } = useParams<{ incidentID: string }>();
   const navigate = useNavigate();
 
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
