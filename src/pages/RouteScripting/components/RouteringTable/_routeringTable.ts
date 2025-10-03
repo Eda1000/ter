@@ -179,14 +179,14 @@ export const Table = styled.table`
   }
 `;
 
-export const TagColor = styled.td`
+export const TagColor = styled.td<{ color?: string }>`
   div {
     display: flex;
     align-items: center;
 
     span {
       display: block;
-      background: ${(props: any) => props.color && `${props.color}`};
+      background: ${(props) => props.color && `${props.color}`};
       height: 15px;
       width: 30px;
       border-radius: 20px;
@@ -196,7 +196,7 @@ export const TagColor = styled.td`
 
   div {
     font-weight: bold;
-    color: ${({ color }: { color: string }) => color && `${color}`};
+    color: ${(props) => props.color && `${props.color}`};
   }
 `;
 

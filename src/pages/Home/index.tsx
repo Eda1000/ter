@@ -57,7 +57,7 @@ export const Home = () => {
         const invoices =
           data?.user?.role?.name === 'Coleta'
             ? response.data.results.filter(
-              (invoice: Invoice) => !invoice.invoice_number,
+              (invoice: any) => !invoice.invoice_number,
             )
             : response.data.results;
 

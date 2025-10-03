@@ -78,7 +78,7 @@ export const SequenceWrapper = styled.div`
   }
 `;
 
-export const RouteSequence = styled.div`
+export const RouteSequence = styled.div<{ color?: string }>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -107,17 +107,17 @@ export const RouteSequence = styled.div`
     width: 30px;
     height: 30px;
 
-    color: ${(props: any) => props.color && props.color};
+    color: ${(props) => props.color && props.color};
     font-size: 0.8rem;
     font-weight: bold;
 
     background: #fff;
-    border: 2.5px solid ${({ color }: { color: string }) => color && color};
+    border: 2.5px solid ${(props) => props.color && props.color};
     border-radius: 20px;
   }
 
   .starting-point {
-    background-color: ${(props: any) => props.color && props.color};
+    background-color: ${(props) => props.color && props.color};
 
     img {
       width: 50%;
@@ -136,7 +136,7 @@ export const RouteSequence = styled.div`
         width: 8px;
 
         border-bottom: 5px solid
-          ${({ color }: { color: string }) => color && color};
+          ${(props) => props.color && props.color};
 
         transition: width 0.5s;
         transition-delay: 0.2s;

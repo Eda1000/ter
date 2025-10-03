@@ -20,7 +20,7 @@ export const MarkerWrapper = styled.div`
   }
 `;
 
-export const Marker = styled.div`
+export const Marker = styled.div<{ tagColor?: string }>`
   display: flex;
 
   position: relative;
@@ -30,7 +30,7 @@ export const Marker = styled.div`
   width: 70px;
   height: 53px;
 
-  background: ${(props: any) =>
+  background: ${(props) =>
     props.tagColor && `${props.tagColor}`};
 
   mask-position: center;
@@ -51,7 +51,7 @@ export const HorseIcon = styled.img`
   height: 18px;
 `;
 
-export const Number = styled.span`
+export const Number = styled.span<{ tagColor?: string }>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -64,7 +64,7 @@ export const Number = styled.span`
   width: 25px;
   height: 25px;
 
-  color: ${({ tagColor }: { tagColor: string }) => props.tagColor && `${props.tagColor}`};
+  color: ${(props) => props.tagColor && `${props.tagColor}`};
 
   font-size: 18px;
   font-weight: bold;

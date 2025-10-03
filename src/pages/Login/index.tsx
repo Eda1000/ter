@@ -85,7 +85,7 @@ export const Login = () => {
     }
   }
 
-  const handleError = async (error: Error | AxiosError) => {
+  const handleError = async (error: any) => {
     let message;
     if (error?.response?.data?.message) {
       message = error?.response?.data.message;

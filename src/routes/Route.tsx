@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route as ReactDOMRoute, Redirect } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { decode } from 'jsonwebtoken';
 import { isBefore } from 'date-fns';
 import { useAuth } from '../hooks/Auth';
@@ -9,20 +9,16 @@ interface RouteProps {
   isPrivateAndPublic?: boolean;
   isPrivate?: boolean;
   Component: React.FC;
-  path: string;
-  exact?: boolean;
 }
 
 export const Route = ({
   isPrivateAndPublic = false,
   isPrivate = false,
   Component,
-  path,
-  exact,
-  ...rest
 }: RouteProps) => {
   const { data, signOut, refreshToken, setTokenOnApiHeaders } = useAuth();
   const [renderRoute, setRenderRoute] = useState(false);
+  const location = useLocation();
 
   const verifyAccessToken = async () => {
     setRenderRoute(false);
@@ -37,9 +33,7 @@ export const Route = ({
       if (isBefore(expirationDate, currentDate)) {
         if (!data.saveLogin) {
           signOut();
-
           window.location.reload();
-
           return;
         }
 
@@ -54,42 +48,24 @@ export const Route = ({
 
   useEffect(() => {
     verifyAccessToken();
-  }, [path]);
+  }, [location.pathname]);
 
-  return (
-    <ReactDOMRoute
-      {...rest}
-      exact
-      render={({ location }) => {
-        if(path !== '/home'
-        && path !== '/'
-        && data?.user?.role?.name === 'Coleta'){
-          toast.error('Usuário não autorizado!')
+  if (
+    location.pathname !== '/home' &&
+    location.pathname !== '/' &&
+    data?.user?.role?.name === 'Coleta'
+  ) {
+    toast.error('Usuário não autorizado!');
+    return <Navigate to="/home" />;
+  }
 
-          return <Redirect to="/home"/>
-        }
+  if (isPrivateAndPublic) {
+    return renderRoute ? <Component /> : null;
+  }
 
-        if (isPrivateAndPublic) {
-          return renderRoute && <Component />;
-        }
+  if (isPrivate === !!data.access_token) {
+    return renderRoute ? <Component /> : null;
+  }
 
-        if (
-          isPrivate ===
-          (data.access_token !== undefined && data.access_token !== '')
-        ) {
-          return renderRoute && <Component />;
-        }
-
-        return (
-          renderRoute && (
-            <Redirect
-              to={{
-                pathname: isPrivate ? '/' : '/home',
-              }}
-            />
-          )
-        );
-      }}
-    />
-  );
+  return <Navigate to={isPrivate ? '/' : '/home'} state={{ from: location }} />;
 };

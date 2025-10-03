@@ -196,7 +196,7 @@ export const DownloadButton = styled(Button)`
   }
 `;
 
-export const FilterButton = styled.button`
+export const FilterButton = styled.button<{ collapsed?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,7 +230,7 @@ export const FilterButton = styled.button`
     background-size: contain;
     background-image: url(${chevron_down});
 
-    transform: ${(props: any) =>
+    transform: ${(props) =>
       props.collapsed ? 'scale(-1)' : 'scale(1)'};
   }
 
@@ -241,8 +241,8 @@ export const FilterButton = styled.button`
   }
 `;
 
-export const FiltersWrapper = styled.div`
-  display: ${(props: any) => (props.expand ? 'flex' : 'none')};
+export const FiltersWrapper = styled.div<{ expand?: boolean }>`
+  display: ${(props) => (props.expand ? 'flex' : 'none')};
   flex-direction: column;
   gap: 20px;
 
@@ -279,7 +279,7 @@ export const SecondaryFilters = styled.div`
   }
 `;
 
-export const SecondaryButton = styled.button`
+export const SecondaryButton = styled.button<{ active?: boolean }>`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -289,7 +289,7 @@ export const SecondaryButton = styled.button`
   max-width: 120px;
   height: 40px;
 
-  color: ${(props: any) =>
+  color: ${(props) =>
     props.active ? '#fff' : 'var(--blue)'};
   font-size: 12px;
 
@@ -298,8 +298,8 @@ export const SecondaryButton = styled.button`
 
   cursor: pointer;
   transition: all 0.2s;
-  background: ${({ active }: { active: boolean }) =>
-    active ? 'var(--blue)' : '#e8eaff'};
+  background: ${(props) =>
+    props.active ? 'var(--blue)' : '#e8eaff'};
 
   box-shadow: 0px 2px 4px rgb(0 0 0 /16%);
 
