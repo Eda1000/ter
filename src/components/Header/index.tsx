@@ -42,7 +42,7 @@ export const Header = () => {
 
         <div>
           <img src={notesImg} alt="Ícone notas fiscais" />
-          <Link to="/">Notas fiscais</Link>
+          <Link to="/home">Notas fiscais</Link>
         </div>
 
         <div>
