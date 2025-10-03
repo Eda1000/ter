@@ -1,6 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
 import 'react-toastify/dist/ReactToastify.css';
-import 'antd/dist/antd.css';
 
 export const GlobalStyle = createGlobalStyle`
   :root {
@@ -79,3 +78,6 @@ export const GlobalStyle = createGlobalStyle`
 
   
 `;
+
+
+export default GlobalStyle;

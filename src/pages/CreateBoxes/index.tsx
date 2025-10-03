@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/Auth';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
@@ -34,7 +34,7 @@ import {
 } from './styles';
 
 export const CreateBoxes = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { data, setData } = useAuth();
 
   const [name, setName] = useState('');
@@ -48,7 +48,7 @@ export const CreateBoxes = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setUserImg(data.user.avatar_url);
+    setUserImg((data.user as any)?.avatar_url);
   }, []);
 
   const validateFormFields = () => {
@@ -99,12 +99,14 @@ export const CreateBoxes = () => {
 
       setUserImg(res.data.avatar_url);
       setData({
+        ...data,
         access_token: data.access_token,
         user: res.data,
+        saveLogin: data.saveLogin,
       });
       setLoading(false);
       toast.success('Caixa cadastrada com sucesso!');
-      history.push('/todas-as-caixas');
+      navigate('/todas-as-caixas');
     } catch (err) {
       handleError(err);
       setLoading(false);
@@ -205,7 +207,7 @@ export const CreateBoxes = () => {
                   <LoadingOutlined style={{ fontSize: 24 }} spin />
                 )}
               </SaveButton>
-              <BackButton onClick={() => history.push('/todas-as-caixas')}>
+              <BackButton onClick={() => navigate('/todas-as-caixas')}>
                 Cancelar
               </BackButton>
             </MainButtons>

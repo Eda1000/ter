@@ -42,11 +42,11 @@ export const Register = () => {
 
   const [roles, setRoles] = useState<rolesProps>();
 
-  const history = useHistory();
+  const navigate = useNavigate();
   const { state } = useLocation();
 
   if (state === '') {
-    history.push('/');
+    navigate('/');
   }
 
   const validateFormFiels = () => {
@@ -107,7 +107,7 @@ export const Register = () => {
           },
         );
         setLoading(false);
-        history.push('/');
+        navigate('/');
         toast.success('Usuário Cadastrado');
       } catch (error: any) {
         toast.error(error.response?.data?.message || error.toString());

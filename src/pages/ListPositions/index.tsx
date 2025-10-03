@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import { Header } from '../../components/Header';
@@ -54,7 +54,7 @@ export const ListPositions = () => {
   const [currentSize, setCurrentSize] = useState(5);
   const [searchPositions, setSearchPositions] = useState('');
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [total, setTotal] = useState<number>(0);
 
@@ -190,7 +190,7 @@ export const ListPositions = () => {
                       positions.map(
                         (item) => (
                           <tr key={item.id} className="columns" onClick={() =>
-                            history.push('/editar-posicao', {
+                            navigate('/editar-posicao', {
                               state: item,
                             })
                           }

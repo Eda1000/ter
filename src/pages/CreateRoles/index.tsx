@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { Select } from 'antd';
 import { toast } from 'react-toastify';
@@ -43,7 +43,7 @@ interface PermissionsInterface {
 
 export const CreateRoles = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [roles, setRoles] = useState<RolesInterface[]>([]);
@@ -205,7 +205,7 @@ export const CreateRoles = () => {
                 )}
               </SaveButton>
 
-              <BackButton onClick={() => history.push('/adicionar-usuario')}>
+              <BackButton onClick={() => navigate('/adicionar-usuario')}>
                 Voltar
               </BackButton>
             </MainButtons>

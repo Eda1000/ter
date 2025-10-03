@@ -85,6 +85,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
   const signOut = () => {
     setUser(null);
     setData({
+        ...data,
       access_token: '',
       user: null,
       saveLogin: false,

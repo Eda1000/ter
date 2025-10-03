@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Pagination } from 'antd';
 import { toast } from 'react-toastify';
@@ -44,7 +44,7 @@ interface UsersApiResponse {
 
 export const ListUsers = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [users, setUsers] = useState<UsersInterface[]>([]);
   const [usersSearch, setUsersSearch] = useState('');
@@ -164,7 +164,7 @@ export const ListUsers = () => {
                       <tr
                         className="columns"
                         onClick={() =>
-                          history.push('/editar-usuarios', {
+                          navigate('/editar-usuarios', {
                             state: users,
                           })
                         }

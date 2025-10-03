@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 import { LoadingOutlined } from '@ant-design/icons';
@@ -49,7 +49,7 @@ interface InvoiceBox {
 
 export const Positions: React.FC<OrderFromProps> = ({ setStep, invoiceID }) => {
   const { Option } = Select;
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
@@ -173,7 +173,7 @@ export const Positions: React.FC<OrderFromProps> = ({ setStep, invoiceID }) => {
 
       if (response) {
         setStep(4);
-        history.push('/home');
+        navigate('/home');
       }
     } catch (error: any) {
       handleError(error.response?.data?.message || error.toString());

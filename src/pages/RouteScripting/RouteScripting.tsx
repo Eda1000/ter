@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import {
   GoogleMap,
@@ -59,7 +59,7 @@ interface Area {
 }
 
 export const RouteScripting: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [map, setMap] = useState<any>(null);
   const [maps, setMaps] = useState<any>(null);
@@ -850,7 +850,7 @@ export const RouteScripting: React.FC = () => {
   const reloadInfo = () => {
     handleSucces('Alterações salvas com sucesso!');
     setTimeout(() => {
-      history.push('reload');
+      navigate('reload');
     }, 3000);
   };
 

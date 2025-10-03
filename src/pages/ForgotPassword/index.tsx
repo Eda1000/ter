@@ -1,4 +1,4 @@
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import logoImg from '../../assets/general/logo.svg';
 import truckImg from '../../assets/general/truck.svg';
@@ -7,10 +7,10 @@ import backgroundImg from '../../assets/general/background.svg';
 import { Container, Form, SideTruck } from './styles';
 
 export const ForgotPassword = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   function handleLoginSubmit() {
-    history.push("/entrar");
+    navigate("/entrar");
   }
 
   return (

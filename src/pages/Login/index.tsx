@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { LoadingOutlined } from '@ant-design/icons';
 
@@ -35,7 +35,7 @@ export const Login = () => {
   const [saveLogin, setSaveLogin] = useState(false);
   const [response, setResponse] = useState<Result[]>();
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const { signIn } = useAuth();
 

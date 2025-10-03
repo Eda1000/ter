@@ -123,8 +123,10 @@ export const EditBoxes = () => {
       });
 
       setData({
+        ...data,
         access_token: data.access_token,
         user: res.data,
+        saveLogin: data.saveLogin,
       });
       setLoading(false);
       toast.success('Caixa editada com sucesso!');
@@ -178,8 +180,10 @@ export const EditBoxes = () => {
 
         setUserImg(res.data.avatar_url);
         setData({
+        ...data,
           access_token: data.access_token,
           user: res.data,
+        saveLogin: data.saveLogin,
         });
         setLoadingPhoto(false);
         toast.success('Imagem alterada!');

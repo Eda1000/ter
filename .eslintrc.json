@@ -8,7 +8,9 @@
     "plugin:react-hooks/recommended"
   ],
   "rules": {
-    "react-hooks/exhaustive-deps": "off"
+    "react-hooks/exhaustive-deps": "off",
+    "@typescript-eslint/ban-types": "off",
+    "prefer-const": "off"
   },
   "settings": {
     "react": {

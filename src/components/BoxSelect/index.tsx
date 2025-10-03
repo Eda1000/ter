@@ -12,11 +12,11 @@ import { LoadingOutlined } from '@ant-design/icons';
 
 import { useBoxes } from '../../hooks/Boxes';
 
-import { Box } from '../Box';
+import BoxComponent from '../Box';
 
 import { Container, Header, BoxContainer, Footer, ShowMore } from './styles';
 
-export interface Box {
+export interface BoxQuantity {
   id: string;
   quantity: number;
 }
@@ -55,7 +55,7 @@ export const BoxSelect: React.FC<OrderFromProps> = ({
   const [totalSelected, setTotalSelected] = useState(0);
   const [totalCubage, setTotalCubage] = useState<number>(0);
 
-  const [listOfBoxes, setListOfBoxes] = useState<Box[]>([]);
+  const [listOfBoxes, setListOfBoxes] = useState<BoxQuantity[]>([]);
   const [apiLoading, setApiLoading] = useState<boolean>(false);
 
   function changeTotalSelected(total: number) {
@@ -233,7 +233,7 @@ export const BoxSelect: React.FC<OrderFromProps> = ({
 
         <BoxContainer>
           {boxes.map((box, index) => (
-            <Box
+            <BoxComponent
               key={index}
               boxData={box}
               disableSelect={disableSelect}

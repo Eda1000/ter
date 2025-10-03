@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 import { Pagination } from 'antd';
@@ -35,7 +35,7 @@ export interface Incident {
 }
 
 export const ListIncidents: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
 
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -74,7 +74,7 @@ export const ListIncidents: React.FC = () => {
         return (
           <tr
             key={index}
-            onClick={() => history.push(`/editar-ocorrencia/${id}`)}
+            onClick={() => navigate(`/editar-ocorrencia/${id}`)}
           >
             <td data-label="Nº da nota fiscal">{invoice_number}</td>
             <td data-label="Ocorrência">{comment}</td>

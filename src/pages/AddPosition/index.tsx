@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import { HiBadgeCheck } from 'react-icons/hi';
@@ -27,7 +27,7 @@ import { Swicth } from '../RouteScripting/components/RouteringDragAndDrop/_route
 
 export const AddPosition = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [position, setPosition] = useState('');
   const [loading, setLoading] = useState(false);
@@ -93,7 +93,7 @@ export const AddPosition = () => {
 
             <PageTitle>Adicionar posições</PageTitle>
 
-            <SeeAllPositionsButton type="button" onClick={() => history.push("/todas-as-posicoes")}>
+            <SeeAllPositionsButton type="button" onClick={() => navigate("/todas-as-posicoes")}>
               Ver todas as posições
             </SeeAllPositionsButton>
 

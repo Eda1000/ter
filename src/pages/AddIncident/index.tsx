@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 import { Radio } from 'antd';
@@ -31,7 +31,7 @@ import {
 } from './styles';
 
 export const AddIncident = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
   const [incident, setIncident] = useState<string>('');
@@ -79,7 +79,7 @@ export const AddIncident = () => {
     toast.success('Incidente cadastrado com sucesso');
 
     setTimeout(() => {
-      history.push('/ocorrencias');
+      navigate('/ocorrencias');
     }, 3000);
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Select, Radio } from 'antd';
 import { toast } from 'react-toastify';
@@ -41,7 +41,7 @@ interface ResponsiblesInterface {
 
 export const CreateTrucks = () => {
   const { data } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [plate, setPlate] = useState('');
@@ -263,7 +263,7 @@ export const CreateTrucks = () => {
                 )}
               </SaveButton>
 
-              <BackButton onClick={() => history.push('/caminhoes')}>
+              <BackButton onClick={() => navigate('/caminhoes')}>
                 Voltar
               </BackButton>
             </MainButtons>

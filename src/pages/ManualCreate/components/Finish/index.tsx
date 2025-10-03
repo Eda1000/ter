@@ -1,7 +1,7 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { HiBadgeCheck } from 'react-icons/hi';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import { ICollectionInformation } from '../../../../Interfaces/CollectionInformation';
@@ -41,7 +41,7 @@ export const Finish = ({
   const [isReadingInvoice, setIsReadingInvoice] = useState(false);
   const [invoice, setInvoice] = useState<Invoice>();
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (initialInvoiceId) {
@@ -75,7 +75,7 @@ export const Finish = ({
       await api.post('/invoices/confirm-order-shipment', payload);
 
       setShowConfirmSave(false);
-      history.push('/');
+      navigate('/');
     } catch (error: any) {
       toast.error(error?.response?.data?.message);
     } finally {

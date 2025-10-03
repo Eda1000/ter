@@ -10,6 +10,19 @@ export interface IBox {
 interface BoxesContextData {
   boxes: IBox[];
   setBoxes: React.Dispatch<React.SetStateAction<IBox[]>>;
+  fetchBoxes?: any;
+  fetchBoxesCreateAt?: any;
+  fetchBoxesUtilization?: any;
+  searchBoxes?: any;
+  orderFilter?: any;
+  createdAtFilterApi?: any;
+  createdAtFilterState?: any;
+  utilizationFilterApi?: any;
+  utilizationFilterState?: any;
+  boxesSearch?: any;
+  setBoxesSearch?: any;
+  loading?: boolean;
+  total?: number;
 }
 
 interface Props {
@@ -33,3 +46,22 @@ function useBoxes(): BoxesContextData {
 }
 
 export { BoxesProvider, useBoxes };
+
+export type Boxes = IBox;
+
+// Add placeholder context data properties for extended functionality
+export interface ExtendedBoxesContextData extends BoxesContextData {
+  fetchBoxes?: any;
+  fetchBoxesCreateAt?: any;
+  fetchBoxesUtilization?: any;
+  searchBoxes?: any;
+  orderFilter?: any;
+  createdAtFilterApi?: any;
+  createdAtFilterState?: any;
+  utilizationFilterApi?: any;
+  utilizationFilterState?: any;
+  boxesSearch?: any;
+  setBoxesSearch?: any;
+  loading?: boolean;
+  total?: number;
+}

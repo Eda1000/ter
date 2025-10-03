@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Pagination, Select } from 'antd';
 import { toast } from 'react-toastify';
@@ -67,7 +67,7 @@ export interface Delivery {
 
 export const ListDeliveryRoutes = () => {
   const { Option } = Select;
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
@@ -118,7 +118,7 @@ export const ListDeliveryRoutes = () => {
   };
 
   const goToLoadingMap = (id: string) => {
-    history.push(`/rota-de-carregamento/${id}`);
+    navigate(`/rota-de-carregamento/${id}`);
   };
 
   const handleChangeSelection = (value: any) => {
