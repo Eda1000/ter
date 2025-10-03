@@ -42,6 +42,21 @@ const mockUsers = [
   }
 ];
 
+const generateMockToken = (userId: string): string => {
+  const expirationTime = Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7);
+  const issuedAt = Math.floor(Date.now() / 1000);
+
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = btoa(JSON.stringify({
+    sub: userId,
+    exp: expirationTime,
+    iat: issuedAt
+  }));
+  const signature = btoa(`mock-signature-${userId}`);
+
+  return `${header}.${payload}.${signature}`;
+};
+
 export const mockLogin = async (email: string, password: string): Promise<LoginResponse> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -49,9 +64,11 @@ export const mockLogin = async (email: string, password: string): Promise<LoginR
 
       if (user) {
         const { password: _, ...userWithoutPassword } = user;
+        const token = generateMockToken(user.id);
+
         resolve({
           user: userWithoutPassword,
-          token: `mock_token_${Date.now()}_${user.id}`
+          token
         });
       } else {
         reject({
