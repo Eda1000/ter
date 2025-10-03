@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import api from "../services/api";
 import { AxiosResponse, AxiosError } from "axios";
+import { mockLogin } from "../services/mockAuth";
 
 interface User {
   id: string;
@@ -59,22 +60,21 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
 
   const signIn = async ({ email, password, saveLogin }: SignInParams) => {
     try {
-      const response: AxiosResponse<{ user: User; token: string }> =
-        await api.post("/login", { email, password });
+      const response = await mockLogin(email, password);
 
-      setUser(response.data.user);
+      setUser(response.user);
       const authData = {
-        access_token: response.data.token,
-        user: response.data.user,
+        access_token: response.token,
+        user: response.user,
         saveLogin,
       };
       setData(authData);
-      
+
       if (saveLogin) {
         localStorage.setItem('@App:auth', JSON.stringify(authData));
       }
-      
-      api.defaults.headers["Authorization"] = `Bearer ${response.data.token}`;
+
+      api.defaults.headers["Authorization"] = `Bearer ${response.token}`;
     } catch (err: unknown) {
       const error = err as AxiosError;
       console.error(error);
