@@ -79,6 +79,7 @@ export const Login = () => {
 
       setLoading(false);
       toast.success('Seja bem vindo!');
+      navigate('/home');
     } catch (err) {
       setLoading(false);
       handleError(err);
