@@ -31,6 +31,7 @@ import {
 
 import { BoxSelect } from '../BoxSelect';
 import api from '../../services/api';
+import { mockGetInvoiceDetails, mockGetOccurrences, mockGetInvoiceOperators } from '../../services/mockInvoices';
 import { toast } from 'react-toastify';
 import { dateMask } from '../../utils/Masks';
 import { ConfirmModal } from '../ConfirmModal/ConfirmModal';
@@ -127,13 +128,9 @@ export const OrderDetails: React.FC<Props> = ({
     try {
       setIsLoadingInvoice(true);
 
-      const { data } = await api.get(`/invoices/${invoiceId}`, {
-        params: {
-          detailed: true,
-        },
-      });
+      const response: any = await mockGetInvoiceDetails(invoiceId);
 
-      setInvoice(data);
+      setInvoice(response.data);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Opps algo deu errado!');
     } finally {
@@ -200,7 +197,7 @@ export const OrderDetails: React.FC<Props> = ({
 
   const getOperators = async () => {
     try {
-      const response = await api.get(`/invoices/${invoiceId}/operators`);
+      const response: any = await mockGetInvoiceOperators(invoiceId);
 
       const operatorsResp = response.data || [];
 
@@ -226,9 +223,7 @@ export const OrderDetails: React.FC<Props> = ({
   const getOccurrences = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`occurrences`, {
-        params: { invoice_id: invoiceId },
-      });
+      const response: any = await mockGetOccurrences(invoiceId);
 
       if (response.data && response.data.length) {
         setOccurrences(response.data);
