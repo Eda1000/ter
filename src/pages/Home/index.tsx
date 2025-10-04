@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import api from '../../services/api';
+import { mockGetInvoices } from '../../services/mockInvoices';
 import { useAuth } from '../../hooks/Auth';
 
 import { Header } from '../../components/Header';
@@ -45,12 +46,10 @@ export const Home = () => {
     try {
       console.log(querySearch);
 
-      const response = await api.get<InvoicesViewResponse>(`invoices/view${querySearch || ''}`, {
-        params: {
-          page,
-          limit: 5,
-          // collection_completed: true,
-        },
+      const response: any = await mockGetInvoices({
+        page,
+        limit: 5,
+        querySearch,
       });
 
       if (response) {
@@ -60,11 +59,6 @@ export const Home = () => {
               (invoice: any) => !invoice.invoice_number,
             )
             : response.data.results;
-
-        // const total =
-        //   data?.user?.role?.name === 'Coleta'
-        //     ? invoices.length
-        //     : response.data.total;
 
         setInvoices(invoices);
         setPage(response.data.page);
