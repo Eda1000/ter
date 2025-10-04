@@ -21,7 +21,7 @@ export const Sidenav = ({ isActive }: SidenavProps) => {
   const { signOut } = useAuth();
 
   return (
-    <Container isActive={isActive}>
+    <Container $isActive={isActive}>
       <div>
         <img src={notesImg} alt="Ícone notas fiscais" />
         <Link to="/home">Notas fiscais</Link>

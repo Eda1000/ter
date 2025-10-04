@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 interface SidebarProps {
-  isActive: boolean;
+  $isActive: boolean;
 }
 
 export const Container = styled.aside<SidebarProps>`
@@ -13,7 +13,7 @@ export const Container = styled.aside<SidebarProps>`
   position: absolute;
   top: 4rem;
   bottom: 0;
-  left: ${(props) => (props.isActive ? 0 : -360)}px;
+  left: ${(props) => (props.$isActive ? 0 : -360)}px;
 
   max-width: min-content;
   max-height: fit-content;

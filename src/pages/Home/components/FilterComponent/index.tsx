@@ -471,7 +471,7 @@ export const FilterComponent: React.FC<FilterProps> = ({ setQuerySearch }) => {
           {data?.user?.role?.name !== 'Coleta' && (
             <FilterButton
               onClick={() => setShowFilters(!showFilters)}
-              collapsed={showFilters}
+              $collapsed={showFilters}
               type="button"
             >
               Filtrar
@@ -481,7 +481,7 @@ export const FilterComponent: React.FC<FilterProps> = ({ setQuerySearch }) => {
       </FilterButtons>
 
       <FiltersWrapper
-        expand={showFilters}
+        $expand={showFilters}
         as="form"
         onSubmit={(e: React.FormEvent) => {
           e.preventDefault();
@@ -493,23 +493,22 @@ export const FilterComponent: React.FC<FilterProps> = ({ setQuerySearch }) => {
             <SecondaryButton
               type="button"
               onClick={() => handleTodayFilter()}
-              active={todayFilterIsActive}
+              $active={todayFilterIsActive}
             >
               Hoje
             </SecondaryButton>
             <SecondaryButton
               type="button"
               onClick={() => handleMyOrdersFilter()}
-              active={myOrdersFilterisActive}
+              $active={myOrdersFilterisActive}
             >
               Minhas notas
             </SecondaryButton>
             {showDownloadButton && (
               <SecondaryButton
-                as="button"
                 type="button"
                 onClick={getDownloadInvoices}
-                active
+                $active
                 style={{
                   fontWeight: 700,
                 }}
@@ -524,7 +523,7 @@ export const FilterComponent: React.FC<FilterProps> = ({ setQuerySearch }) => {
               width: 'fit-content',
             }}
           >
-            <SecondaryButton active>Pesquisar</SecondaryButton>
+            <SecondaryButton $active>Pesquisar</SecondaryButton>
           </SecondaryFilters>
         </FiltersHeader>
 

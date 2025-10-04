@@ -196,7 +196,7 @@ export const DownloadButton = styled(Button)`
   }
 `;
 
-export const FilterButton = styled.button<{ collapsed?: boolean }>`
+export const FilterButton = styled.button<{ $collapsed?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,7 +231,7 @@ export const FilterButton = styled.button<{ collapsed?: boolean }>`
     background-image: url(${chevron_down});
 
     transform: ${(props) =>
-      props.collapsed ? 'scale(-1)' : 'scale(1)'};
+      props.$collapsed ? 'scale(-1)' : 'scale(1)'};
   }
 
   &:hover {
@@ -241,8 +241,8 @@ export const FilterButton = styled.button<{ collapsed?: boolean }>`
   }
 `;
 
-export const FiltersWrapper = styled.div<{ expand?: boolean }>`
-  display: ${(props) => (props.expand ? 'flex' : 'none')};
+export const FiltersWrapper = styled.div<{ $expand?: boolean }>`
+  display: ${(props) => (props.$expand ? 'flex' : 'none')};
   flex-direction: column;
   gap: 20px;
 
@@ -279,7 +279,7 @@ export const SecondaryFilters = styled.div`
   }
 `;
 
-export const SecondaryButton = styled.button<{ active?: boolean }>`
+export const SecondaryButton = styled.button<{ $active?: boolean }>`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -290,7 +290,7 @@ export const SecondaryButton = styled.button<{ active?: boolean }>`
   height: 40px;
 
   color: ${(props) =>
-    props.active ? '#fff' : 'var(--blue)'};
+    props.$active ? '#fff' : 'var(--blue)'};
   font-size: 12px;
 
   border: 0;
@@ -299,7 +299,7 @@ export const SecondaryButton = styled.button<{ active?: boolean }>`
   cursor: pointer;
   transition: all 0.2s;
   background: ${(props) =>
-    props.active ? 'var(--blue)' : '#e8eaff'};
+    props.$active ? 'var(--blue)' : '#e8eaff'};
 
   box-shadow: 0px 2px 4px rgb(0 0 0 /16%);
 
